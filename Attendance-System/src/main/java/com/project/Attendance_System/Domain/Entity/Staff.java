@@ -1,7 +1,6 @@
 package com.project.Attendance_System.Domain.Entity;
 
 import com.fasterxml.jackson.annotation.JsonIgnore;
-import com.fasterxml.jackson.annotation.JsonSetter;
 import com.project.Attendance_System.Domain.Enum.Authority;
 import com.project.Attendance_System.Domain.Enum.Gender;
 import jakarta.persistence.*;

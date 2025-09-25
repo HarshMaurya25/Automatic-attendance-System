@@ -23,7 +23,11 @@ public class Student {
     @GeneratedValue(strategy = GenerationType.UUID)
     private UUID id;
 
-    private String name;
+    private String first_name;
+
+    private String surname;
+
+    private String father_name;
 
     private Integer roll_number;
 
@@ -57,8 +61,6 @@ public class Student {
 
     private String State;
 
-    @JsonIgnore
-    @OneToOne
-    @JoinColumn(name = "attendance")
-    private Attendance attendance;
+    @OneToMany(mappedBy = "student" , cascade = CascadeType.ALL , fetch = FetchType.LAZY)
+    private List<Attendance> attendance;
 }

@@ -20,7 +20,7 @@ public class Division {
     @GeneratedValue(strategy = GenerationType.UUID)
     private UUID id;
 
-    private String year;
+    private String name;
 
     @ManyToOne
     @JoinColumn(name = "department")
@@ -45,4 +45,8 @@ public class Division {
     @OneToOne
     @JoinColumn(name = "attendance")
     private Attendance attendance;
+
+    @JsonIgnore
+    @OneToOne(mappedBy = "division" , cascade = CascadeType.ALL , fetch = FetchType.LAZY)
+    private LoginSessions loginSessions;
 }

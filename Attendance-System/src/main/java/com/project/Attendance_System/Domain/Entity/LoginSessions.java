@@ -24,7 +24,9 @@ public class LoginSessions {
     @JoinColumn(name = "college")
     private College college;
 
-    private String session_id;
+    @OneToOne
+    @JoinColumn(name = "division")
+    private Division division;
 
     @Enumerated(EnumType.STRING)
     private SessionType session_type;

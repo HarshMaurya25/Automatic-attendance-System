@@ -1,10 +1,12 @@
 package com.project.Attendance_System.Domain.Entity;
 
 import com.fasterxml.jackson.annotation.JsonIgnore;
+import com.project.Attendance_System.Domain.Enum.Status;
 import jakarta.persistence.*;
 import lombok.*;
 
-import java.time.LocalDateTime;
+import java.time.LocalDate;
+import java.time.LocalTime;
 import java.util.UUID;
 
 @Getter
@@ -20,7 +22,8 @@ public class Attendance {
     @GeneratedValue(strategy = GenerationType.UUID)
     private UUID id;
 
-    @OneToOne(mappedBy = "attendance" , cascade = CascadeType.ALL , fetch = FetchType.LAZY)
+    @ManyToOne
+    @JoinColumn(name = "student")
     private Student student;
 
     @OneToOne(mappedBy = "attendance" , cascade = CascadeType.ALL , fetch = FetchType.LAZY)
@@ -32,8 +35,14 @@ public class Attendance {
     @OneToOne(mappedBy = "attendance" , cascade = CascadeType.ALL , fetch = FetchType.LAZY)
     private Staff teacher;
 
-    @Temporal(TemporalType.TIMESTAMP)
-    private LocalDateTime date_time;
+    @Temporal(TemporalType.TIME)
+    private LocalTime time;
+
+    @Temporal(TemporalType.DATE)
+    private LocalDate date;
+
+    @Enumerated(EnumType.STRING)
+    private Status status;
 
     @JsonIgnore
     @ManyToOne
