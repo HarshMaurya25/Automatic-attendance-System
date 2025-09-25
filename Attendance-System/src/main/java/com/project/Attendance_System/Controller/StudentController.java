@@ -30,14 +30,14 @@ public class StudentController {
 
     }
 
-    @GetMapping("/{id}")
+    @GetMapping("/private/{id}")
     public ResponseEntity<StudentResponseDto> getStudentDetail(
             @PathVariable UUID id
             ){
         return studentService.getStudentDetail(id);
     }
 
-    @GetMapping("/student/{studentId}")
+    @GetMapping("/private/attendance/{studentId}")
     public ResponseEntity<List<AttendanceRespondDto>> getAttendanceByStudentAndDateRange(
             @PathVariable UUID studentId,
             @RequestParam("start") @DateTimeFormat(iso = DateTimeFormat.ISO.DATE) LocalDate start,
