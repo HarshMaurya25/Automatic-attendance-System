@@ -1,7 +1,7 @@
 package com.project.Attendance_System.Mapper;
 
-import com.project.Attendance_System.Domain.Dtos.StudentLoginRequestDto;
-import com.project.Attendance_System.Domain.Dtos.StudentResponseDto;
+import com.project.Attendance_System.Domain.Dtos.Student.StudentLoginRequestDto;
+import com.project.Attendance_System.Domain.Dtos.Student.StudentResponseDto;
 import com.project.Attendance_System.Domain.Entity.Student;
 import org.springframework.stereotype.Component;
 

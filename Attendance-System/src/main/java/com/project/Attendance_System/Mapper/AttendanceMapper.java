@@ -1,6 +1,6 @@
 package com.project.Attendance_System.Mapper;
 
-import com.project.Attendance_System.Domain.Dtos.AttendanceRespondDto;
+import com.project.Attendance_System.Domain.Dtos.Attendance.AttendanceRespondDto;
 import com.project.Attendance_System.Domain.Entity.Attendance;
 import org.springframework.stereotype.Component;
 

@@ -1,4 +1,4 @@
-package com.project.Attendance_System.Domain.Dtos;
+package com.project.Attendance_System.Domain.Dtos.Student;
 
 import com.project.Attendance_System.Domain.Enum.Gender;
 import jakarta.validation.constraints.*;

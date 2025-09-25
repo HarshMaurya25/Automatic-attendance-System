@@ -46,7 +46,4 @@ public class Division {
     @JoinColumn(name = "attendance")
     private Attendance attendance;
 
-    @JsonIgnore
-    @OneToOne(mappedBy = "division" , cascade = CascadeType.ALL , fetch = FetchType.LAZY)
-    private LoginSessions loginSessions;
 }

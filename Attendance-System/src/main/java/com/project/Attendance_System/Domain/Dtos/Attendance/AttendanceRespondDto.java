@@ -1,4 +1,4 @@
-package com.project.Attendance_System.Domain.Dtos;
+package com.project.Attendance_System.Domain.Dtos.Attendance;
 
 import lombok.AllArgsConstructor;
 import lombok.Builder;

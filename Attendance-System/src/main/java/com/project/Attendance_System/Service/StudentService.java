@@ -1,15 +1,17 @@
 package com.project.Attendance_System.Service;
 
-import com.project.Attendance_System.Domain.Dtos.AttendanceRespondDto;
-import com.project.Attendance_System.Domain.Dtos.StudentLoginRequestDto;
-import com.project.Attendance_System.Domain.Dtos.StudentResponseDto;
+import com.project.Attendance_System.Domain.Dtos.Attendance.AttendanceRespondDto;
+import com.project.Attendance_System.Domain.Dtos.Student.StudentLoginRequestDto;
+import com.project.Attendance_System.Domain.Dtos.Student.StudentResponseDto;
 import com.project.Attendance_System.Domain.Entity.Attendance;
+import com.project.Attendance_System.Domain.Entity.Division;
 import com.project.Attendance_System.Domain.Entity.LoginSessions;
 import com.project.Attendance_System.Domain.Entity.Student;
 import com.project.Attendance_System.Domain.Enum.SessionType;
 import com.project.Attendance_System.Mapper.AttendanceMapper;
 import com.project.Attendance_System.Mapper.StudentMapper;
 import com.project.Attendance_System.Repository.AttendanceRepo;
+import com.project.Attendance_System.Repository.DivisionRepo;
 import com.project.Attendance_System.Repository.LoginSessionRepo;
 import com.project.Attendance_System.Repository.StudentsRepo;
 import com.project.Attendance_System.Service.Interface.StudentServiceInterface;
@@ -33,6 +35,7 @@ public class StudentService implements StudentServiceInterface {
     private final StudentsRepo studentsRepo;
     private final LoginSessionRepo loginSessionRepo;
     private final AttendanceRepo attendanceRepo;
+    private final DivisionRepo divisionRepo;
 
     public ResponseEntity<StudentResponseDto> createNewStudent(StudentLoginRequestDto studentLoginRequestDto) {
         UUID session_id = UUID.fromString(studentLoginRequestDto.getSession_code());
@@ -43,9 +46,12 @@ public class StudentService implements StudentServiceInterface {
 
         Student student = studentMapper.ToStudent(studentLoginRequestDto);
 
+        Division division = divisionRepo.findById(loginSessions.getPlace_identifier())
+                        .orElseThrow(()-> new RuntimeException("Division Not Found"));
+
         student.setCollege(loginSessions.getCollege());
-        student.setDivision(loginSessions.getDivision());
-        student.setDepartment(loginSessions.getDivision().getDepartment());
+        student.setDivision(division);
+        student.setDepartment(division.getDepartment());
 
         studentsRepo.save(student);
         StudentResponseDto studentResponseDto = studentMapper.ToStudentResponseDto(student);

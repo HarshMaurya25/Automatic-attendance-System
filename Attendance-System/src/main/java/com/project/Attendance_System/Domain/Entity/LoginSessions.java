@@ -24,9 +24,7 @@ public class LoginSessions {
     @JoinColumn(name = "college")
     private College college;
 
-    @OneToOne
-    @JoinColumn(name = "division")
-    private Division division;
+    private UUID place_identifier;
 
     @Enumerated(EnumType.STRING)
     private SessionType session_type;

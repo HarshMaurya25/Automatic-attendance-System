@@ -1,8 +1,8 @@
 package com.project.Attendance_System.Controller;
 
-import com.project.Attendance_System.Domain.Dtos.AttendanceRespondDto;
-import com.project.Attendance_System.Domain.Dtos.StudentLoginRequestDto;
-import com.project.Attendance_System.Domain.Dtos.StudentResponseDto;
+import com.project.Attendance_System.Domain.Dtos.Attendance.AttendanceRespondDto;
+import com.project.Attendance_System.Domain.Dtos.Student.StudentLoginRequestDto;
+import com.project.Attendance_System.Domain.Dtos.Student.StudentResponseDto;
 import com.project.Attendance_System.Service.Interface.StudentServiceInterface;
 import jakarta.validation.Valid;
 import lombok.AllArgsConstructor;

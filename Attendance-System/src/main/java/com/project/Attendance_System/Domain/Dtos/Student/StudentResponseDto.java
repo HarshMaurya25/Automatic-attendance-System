@@ -1,10 +1,9 @@
-package com.project.Attendance_System.Domain.Dtos;
+package com.project.Attendance_System.Domain.Dtos.Student;
 
 import com.project.Attendance_System.Domain.Enum.Gender;
 import lombok.AllArgsConstructor;
 import lombok.Builder;
 import lombok.Data;
-import lombok.NoArgsConstructor;
 
 import java.time.LocalDate;
 import java.util.UUID;
