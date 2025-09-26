@@ -1,5 +1,7 @@
 package com.project.Attendance_System.Service;
 
+import com.project.Attendance_System.Domain.Dtos.Division.DivisionRequestDto;
+import com.project.Attendance_System.Domain.Dtos.Division.DivisionResponseDto;
 import com.project.Attendance_System.Domain.Dtos.LoginSession.LoginSessionRequestDto;
 import com.project.Attendance_System.Domain.Dtos.LoginSession.LoginSessionRespondDto;
 import com.project.Attendance_System.Domain.Entity.College;
@@ -7,6 +9,8 @@ import com.project.Attendance_System.Domain.Entity.Department;
 import com.project.Attendance_System.Domain.Entity.Division;
 import com.project.Attendance_System.Domain.Entity.LoginSessions;
 import com.project.Attendance_System.Domain.Enum.SessionType;
+import com.project.Attendance_System.ExceptionHandler.Custom.VariableNotFound;
+import com.project.Attendance_System.Mapper.DivisionMapper;
 import com.project.Attendance_System.Mapper.LoginSessionMapper;
 import com.project.Attendance_System.Repository.CollegeRepo;
 import com.project.Attendance_System.Repository.DepartmentRepo;
@@ -18,6 +22,8 @@ import lombok.Data;
 import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Service;
 
+import java.util.Collections;
+import java.util.List;
 import java.util.UUID;
 
 @Service
@@ -26,6 +32,7 @@ import java.util.UUID;
 public class HODService implements HODServiceInterface {
 
     private final LoginSessionMapper loginSessionMapper;
+    private final DivisionMapper divisionMapper;
 
     private final LoginSessionRepo loginSessionRepo;
     private final CollegeRepo collegeRepo;
@@ -61,6 +68,30 @@ public class HODService implements HODServiceInterface {
             throw new RuntimeException("Error Creating Session");
         }
         return ResponseEntity.ok().body(loginSessionRespondDto);
+    }
+
+    public ResponseEntity<DivisionResponseDto> createDivision(DivisionRequestDto divisionRequestDto){
+        Department department = departmentRepo.findById(divisionRequestDto.getDepartmentId())
+                .orElseThrow(() -> new VariableNotFound("Division"));
+
+        College college = department.getCollege();
+
+        Division division = divisionMapper.toDivision(divisionRequestDto, department);
+        divisionRepo.save(division);
+
+        DivisionResponseDto divisionResponseDto = divisionMapper.toDto(division);
+        return ResponseEntity.ok().body(divisionResponseDto);
+    }
+
+    public ResponseEntity<List<DivisionResponseDto>> getDivisionInDepartment(UUID department_id){
+        Department department = departmentRepo.findById(department_id).orElseThrow(
+                () -> new VariableNotFound("Department")
+        );
+        List<Division> divisions = divisionRepo.findAllByDepartment(department);
+
+        List<DivisionResponseDto> divisionResponseDtos = divisionMapper.toDtoList(divisions);
+
+        return ResponseEntity.ok().body(divisionResponseDtos);
 
     }
 }

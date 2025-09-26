@@ -5,6 +5,7 @@ import com.fasterxml.jackson.annotation.JsonIgnore;
 import com.project.Attendance_System.Domain.Enum.Gender;
 import jakarta.persistence.*;
 import lombok.*;
+import org.hibernate.validator.constraints.UniqueElements;
 
 import java.time.LocalDate;
 import java.util.List;
@@ -53,6 +54,7 @@ public class Student {
 
     private String phone_number;
 
+    @UniqueElements
     private String email;
 
     private String address;

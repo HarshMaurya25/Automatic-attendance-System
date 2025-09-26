@@ -5,6 +5,7 @@ import com.project.Attendance_System.Domain.Enum.Authority;
 import com.project.Attendance_System.Domain.Enum.Gender;
 import jakarta.persistence.*;
 import lombok.*;
+import org.hibernate.validator.constraints.UniqueElements;
 
 import java.time.LocalDate;
 import java.util.List;
@@ -54,6 +55,7 @@ public class Staff {
 
     private String phone_number;
 
+    @UniqueElements
     private String email;
 
     private String address;

@@ -8,6 +8,8 @@ import com.project.Attendance_System.Domain.Entity.Division;
 import com.project.Attendance_System.Domain.Entity.LoginSessions;
 import com.project.Attendance_System.Domain.Entity.Student;
 import com.project.Attendance_System.Domain.Enum.SessionType;
+import com.project.Attendance_System.ExceptionHandler.Custom.LoginSessionIncorrectException;
+import com.project.Attendance_System.ExceptionHandler.Custom.VariableNotFound;
 import com.project.Attendance_System.Mapper.AttendanceMapper;
 import com.project.Attendance_System.Mapper.StudentMapper;
 import com.project.Attendance_System.Repository.AttendanceRepo;
@@ -41,13 +43,14 @@ public class StudentService implements StudentServiceInterface {
         UUID session_id = UUID.fromString(studentLoginRequestDto.getSession_code());
         LoginSessions loginSessions = loginSessionRepo.getReferenceById(session_id);
         if(!loginSessions.getSession_type().equals(SessionType.STUDENT)){
-            throw new IllegalArgumentException("This is not a Correct Session Id");
+            String message = String.format("Login Session is Incorrect %s : %s", loginSessions.getSession_type(), loginSessions.getId());
+            throw new LoginSessionIncorrectException("message");
         }
 
         Student student = studentMapper.ToStudent(studentLoginRequestDto);
 
         Division division = divisionRepo.findById(loginSessions.getPlace_identifier())
-                        .orElseThrow(()-> new RuntimeException("Division Not Found"));
+                        .orElseThrow(()-> new VariableNotFound("Division"));
 
         student.setCollege(loginSessions.getCollege());
         student.setDivision(division);
@@ -61,7 +64,7 @@ public class StudentService implements StudentServiceInterface {
 
     public ResponseEntity<StudentResponseDto> getStudentDetail(UUID id){
         Student student = studentsRepo.findById(id)
-                .orElseThrow(()-> new IllegalArgumentException("Such Student Not Exist"));
+                .orElseThrow(()-> new VariableNotFound("Student"));
 
         StudentResponseDto studentResponseDto = studentMapper.ToStudentResponseDto(student);
 
@@ -70,7 +73,7 @@ public class StudentService implements StudentServiceInterface {
 
     public ResponseEntity<List<AttendanceRespondDto>> getStudentAttendance(UUID id , LocalDate start , LocalDate end){
 
-        Student student = studentsRepo.findById(id).orElseThrow(()-> new IllegalArgumentException("Such Student Not Exist"));
+        Student student = studentsRepo.findById(id).orElseThrow(()-> new VariableNotFound("Student"));
 
         List<Attendance> attendances = attendanceRepo
                 .findByStudentIdAndDateBetweenOrderByDateAscTimeAsc( student, start , end);
