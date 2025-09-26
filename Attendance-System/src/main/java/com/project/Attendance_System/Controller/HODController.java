@@ -18,7 +18,7 @@ import java.util.UUID;
 
 @Controller
 @AllArgsConstructor
-@RequestMapping("/api/v1")
+@RequestMapping("/api/v1/hod")
 public class HODController {
 
     private final HODServiceInterface hodService;

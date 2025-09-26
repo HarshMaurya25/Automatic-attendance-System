@@ -16,7 +16,8 @@ import java.util.UUID;
 @AllArgsConstructor
 public class AttendanceResponseByCourseDto {
     private UUID id;
-    private String studentName;
+    private String student_name;
+    private String roll_number;
     private Status status;
     private LocalDate date;
     private LocalTime time;

@@ -41,7 +41,7 @@ public class Student {
     private String year;
 
     @ManyToOne
-    @JoinColumn(name = "divisions")
+    @JoinColumn(name = "division")
     private Division division;
 
     @ManyToOne

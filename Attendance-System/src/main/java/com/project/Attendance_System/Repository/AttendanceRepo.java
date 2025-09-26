@@ -18,4 +18,6 @@ public interface AttendanceRepo extends JpaRepository<Attendance , UUID> {
             Student student, LocalDate start, LocalDate end);
 
     List<Attendance> findAllByCourseAndDivisionOrderByDateAscTimeAsc(Course course, Division division);
+
+    List<Attendance> findAllByStudent(Student student);
 }

@@ -26,10 +26,12 @@ public class Division {
     @JoinColumn(name = "department")
     private Department department;
 
-
     @ManyToOne
     @JoinColumn(name = "college")
     private College college;
+
+    @OneToMany(mappedBy = "division" , cascade = CascadeType.ALL , fetch = FetchType.LAZY)
+    private List<Student> student;
 
     @ManyToMany
     @JoinTable(

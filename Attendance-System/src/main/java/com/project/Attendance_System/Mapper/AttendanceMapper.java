@@ -25,7 +25,8 @@ public class AttendanceMapper {
     public AttendanceResponseByCourseDto toDtoForCourse(Attendance attendance) {
         return AttendanceResponseByCourseDto.builder()
                 .id(attendance.getId())
-                .studentName(attendance.getStudent().getFirst_name()+ " " + attendance.getStudent().getSurname())
+                .student_name(attendance.getStudent().getFirst_name()+ " " + attendance.getStudent().getSurname())
+                .roll_number(String.valueOf(attendance.getStudent().getRoll_number()))
                 .status(attendance.getStatus())
                 .date(attendance.getDate())
                 .time(attendance.getTime())
