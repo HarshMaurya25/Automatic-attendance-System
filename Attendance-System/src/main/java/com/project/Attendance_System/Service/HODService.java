@@ -1,5 +1,7 @@
 package com.project.Attendance_System.Service;
 
+import com.project.Attendance_System.Domain.Dtos.Department.DepartmentRequestDto;
+import com.project.Attendance_System.Domain.Dtos.Department.DepartmentResponseDto;
 import com.project.Attendance_System.Domain.Dtos.Division.DivisionRequestDto;
 import com.project.Attendance_System.Domain.Dtos.Division.DivisionResponseDto;
 import com.project.Attendance_System.Domain.Dtos.LoginSession.LoginSessionRequestDto;
@@ -10,6 +12,7 @@ import com.project.Attendance_System.Domain.Entity.Division;
 import com.project.Attendance_System.Domain.Entity.LoginSessions;
 import com.project.Attendance_System.Domain.Enum.SessionType;
 import com.project.Attendance_System.ExceptionHandler.Custom.VariableNotFound;
+import com.project.Attendance_System.Mapper.DepartmentMapper;
 import com.project.Attendance_System.Mapper.DivisionMapper;
 import com.project.Attendance_System.Mapper.LoginSessionMapper;
 import com.project.Attendance_System.Repository.CollegeRepo;
@@ -33,6 +36,7 @@ public class HODService implements HODServiceInterface {
 
     private final LoginSessionMapper loginSessionMapper;
     private final DivisionMapper divisionMapper;
+    private final DepartmentMapper departmentMapper;
 
     private final LoginSessionRepo loginSessionRepo;
     private final CollegeRepo collegeRepo;
@@ -94,4 +98,26 @@ public class HODService implements HODServiceInterface {
         return ResponseEntity.ok().body(divisionResponseDtos);
 
     }
+
+        @Override
+        public ResponseEntity<DepartmentResponseDto> createDepartment(DepartmentRequestDto dto) {
+            College college = collegeRepo.findById(dto.getCollegeId())
+                    .orElseThrow(() -> new VariableNotFound("College"));
+
+            Department department = departmentMapper.toEntity(dto , college);
+            departmentRepo.save(department);
+
+            DepartmentResponseDto departmentResponseDto = departmentMapper.toDto(department);
+
+            return ResponseEntity.ok().body(departmentResponseDto);
+        }
+
+        @Override
+        public ResponseEntity<DepartmentResponseDto> getDepartment(UUID id) {
+            Department department = departmentRepo.findById(id)
+                    .orElseThrow(() -> new VariableNotFound("Department"));
+
+            DepartmentResponseDto departmentResponseDto = departmentMapper.toDto(department);
+            return ResponseEntity.ok().body(departmentResponseDto);
+        }
 }
