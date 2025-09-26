@@ -27,8 +27,8 @@ import java.util.List;
 import java.util.UUID;
 
 @Service
-@AllArgsConstructor
 @Data
+@AllArgsConstructor
 public class StudentService implements StudentServiceInterface {
 
     private final StudentMapper studentMapper;

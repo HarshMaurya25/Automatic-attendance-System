@@ -1,6 +1,7 @@
 package com.project.Attendance_System.Mapper;
 
 import com.project.Attendance_System.Domain.Dtos.Attendance.AttendanceRespondDto;
+import com.project.Attendance_System.Domain.Dtos.Attendance.AttendanceResponseByCourseDto;
 import com.project.Attendance_System.Domain.Entity.Attendance;
 import org.springframework.stereotype.Component;
 
@@ -18,6 +19,16 @@ public class AttendanceMapper {
                 .date(attendance.getDate().format(formatter))
                 .time(attendance.getTime().format(formatter))
                 .status(attendance.getStatus().name())
+                .build();
+    }
+
+    public AttendanceResponseByCourseDto toDtoForCourse(Attendance attendance) {
+        return AttendanceResponseByCourseDto.builder()
+                .id(attendance.getId())
+                .studentName(attendance.getStudent().getFirst_name()+ " " + attendance.getStudent().getSurname())
+                .status(attendance.getStatus())
+                .date(attendance.getDate())
+                .time(attendance.getTime())
                 .build();
     }
 }
