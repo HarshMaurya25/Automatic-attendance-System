@@ -87,7 +87,7 @@ public class StudentService implements StudentServiceInterface {
         Student student = studentsRepo.findById(id).orElseThrow(()-> new VariableNotFound("Student"));
 
         List<Attendance> attendances = attendanceRepo
-                .findByStudentIdAndDateBetweenOrderByDateAscTimeAsc( student, start , end);
+                .findByStudentIdAndDateBetweenOrderByDateAscTimeAsc( student.getId(), start , end);
 
         List<AttendanceRespondDto> attendanceRespondDto = attendances.stream()
                 .map(attendanceMapper::toDto)

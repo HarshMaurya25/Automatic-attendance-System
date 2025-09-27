@@ -8,12 +8,10 @@ import org.springframework.stereotype.Component;
 @Component
 public class UserMapper {
 
-    public User fromStudentDto(LoginRequestDto Dto){
+    public User fromLoginRequestDto(LoginRequestDto Dto){
         return User.builder()
                 .email(Dto.getEmail())
                 .authority(Authority.STUDENT)
-                .password(Dto.getPassword())
                 .build();
-
     }
 }

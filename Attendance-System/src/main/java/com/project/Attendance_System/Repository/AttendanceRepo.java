@@ -15,7 +15,7 @@ import java.util.UUID;
 public interface AttendanceRepo extends JpaRepository<Attendance , UUID> {
 
     List<Attendance> findByStudentIdAndDateBetweenOrderByDateAscTimeAsc(
-            Student student, LocalDate start, LocalDate end);
+            UUID student, LocalDate start, LocalDate end);
 
     List<Attendance> findAllByCourseAndDivisionOrderByDateAscTimeAsc(Course course, Division division);
 
