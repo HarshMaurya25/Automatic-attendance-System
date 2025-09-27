@@ -3,23 +3,19 @@ package com.project.Attendance_System.Service;
 import com.project.Attendance_System.Domain.Dtos.Attendance.AttendanceRespondDto;
 import com.project.Attendance_System.Domain.Dtos.Student.StudentLoginRequestDto;
 import com.project.Attendance_System.Domain.Dtos.Student.StudentResponseDto;
-import com.project.Attendance_System.Domain.Entity.Attendance;
-import com.project.Attendance_System.Domain.Entity.Division;
-import com.project.Attendance_System.Domain.Entity.LoginSessions;
-import com.project.Attendance_System.Domain.Entity.Student;
+import com.project.Attendance_System.Domain.Entity.*;
 import com.project.Attendance_System.Domain.Enum.SessionType;
 import com.project.Attendance_System.ExceptionHandler.Custom.LoginSessionIncorrectException;
 import com.project.Attendance_System.ExceptionHandler.Custom.VariableNotFound;
 import com.project.Attendance_System.Mapper.AttendanceMapper;
 import com.project.Attendance_System.Mapper.StudentMapper;
-import com.project.Attendance_System.Repository.AttendanceRepo;
-import com.project.Attendance_System.Repository.DivisionRepo;
-import com.project.Attendance_System.Repository.LoginSessionRepo;
-import com.project.Attendance_System.Repository.StudentsRepo;
+import com.project.Attendance_System.Mapper.UserMapper;
+import com.project.Attendance_System.Repository.*;
 import com.project.Attendance_System.Service.Interface.StudentServiceInterface;
 import lombok.AllArgsConstructor;
 import lombok.Data;
 import org.springframework.http.ResponseEntity;
+import org.springframework.security.core.userdetails.UsernameNotFoundException;
 import org.springframework.stereotype.Service;
 
 import java.time.LocalDate;
@@ -33,33 +29,48 @@ public class StudentService implements StudentServiceInterface {
 
     private final StudentMapper studentMapper;
     private final AttendanceMapper attendanceMapper;
+    private final UserMapper userMapper;
 
     private final StudentsRepo studentsRepo;
     private final LoginSessionRepo loginSessionRepo;
     private final AttendanceRepo attendanceRepo;
     private final DivisionRepo divisionRepo;
+    private final UserRepo userRepo;
 
-    public ResponseEntity<StudentResponseDto> createNewStudent(StudentLoginRequestDto studentLoginRequestDto) {
-        UUID session_id = UUID.fromString(studentLoginRequestDto.getSession_code());
-        LoginSessions loginSessions = loginSessionRepo.getReferenceById(session_id);
-        if(!loginSessions.getSession_type().equals(SessionType.STUDENT)){
-            String message = String.format("Login Session is Incorrect %s : %s", loginSessions.getSession_type(), loginSessions.getId());
-            throw new LoginSessionIncorrectException("message");
+    @Override
+    public ResponseEntity<StudentResponseDto> createNewStudent(StudentLoginRequestDto dto) {
+        UUID sessionId = UUID.fromString(dto.getSession_code());
+        LoginSessions loginSession = loginSessionRepo.findById(sessionId)
+                .orElseThrow(() -> new LoginSessionIncorrectException("Login Session not found"));
+
+
+        if (!loginSession.getSession_type().equals(SessionType.STUDENT)) {
+            throw new LoginSessionIncorrectException(
+                    "Login Session is Incorrect: " + loginSession.getSession_type()
+            );
         }
 
-        Student student = studentMapper.ToStudent(studentLoginRequestDto);
+        Student student = studentMapper.ToStudent(dto);
 
-        Division division = divisionRepo.findById(loginSessions.getPlace_identifier())
-                        .orElseThrow(()-> new VariableNotFound("Division"));
+        Division division = divisionRepo.findById(loginSession.getPlace_identifier())
+                .orElseThrow(() -> new VariableNotFound("Division"));
 
-        student.setCollege(loginSessions.getCollege());
+        student.setCollege(loginSession.getCollege());
         student.setDivision(division);
         student.setDepartment(division.getDepartment());
 
-        studentsRepo.save(student);
-        StudentResponseDto studentResponseDto = studentMapper.ToStudentResponseDto(student);
+        User user = userRepo.findById(dto.getEmail())
+                .orElseThrow(() -> new UsernameNotFoundException("User not found: " + dto.getEmail()));
+        if(user == null){
+            throw new UsernameNotFoundException("user is not found " + dto.getEmail());
+        }
 
-        return ResponseEntity.ok().body(studentResponseDto);
+        student.setUser(user);
+
+        Student savedStudent = studentsRepo.save(student);
+
+        StudentResponseDto responseDto = studentMapper.ToStudentResponseDto(savedStudent);
+        return ResponseEntity.ok(responseDto);
     }
 
     public ResponseEntity<StudentResponseDto> getStudentDetail(UUID id){

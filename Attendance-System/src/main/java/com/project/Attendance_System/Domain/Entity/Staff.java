@@ -21,7 +21,6 @@ import java.util.UUID;
 public class Staff {
 
     @Id
-    @GeneratedValue(strategy = GenerationType.UUID)
     private UUID id;
 
     private String name;

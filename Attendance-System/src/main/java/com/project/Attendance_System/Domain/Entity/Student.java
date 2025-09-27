@@ -54,7 +54,7 @@ public class Student {
 
     private String phone_number;
 
-    @UniqueElements
+    @Column(unique = true)
     private String email;
 
     private String address;
@@ -65,4 +65,7 @@ public class Student {
 
     @OneToMany(mappedBy = "student" , cascade = CascadeType.ALL , fetch = FetchType.LAZY)
     private List<Attendance> attendance;
+
+    @OneToOne(mappedBy = "student" , cascade = CascadeType.ALL , fetch = FetchType.EAGER)
+    private User user;
 }
