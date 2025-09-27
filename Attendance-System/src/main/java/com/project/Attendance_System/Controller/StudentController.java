@@ -8,6 +8,7 @@ import jakarta.validation.Valid;
 import lombok.AllArgsConstructor;
 import org.springframework.format.annotation.DateTimeFormat;
 import org.springframework.http.ResponseEntity;
+import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.stereotype.Controller;
 import org.springframework.web.bind.annotation.*;
 
@@ -17,12 +18,12 @@ import java.util.UUID;
 
 @Controller
 @AllArgsConstructor
-@RequestMapping("/api/v1/student")
+@RequestMapping("/api/v1")
 public class StudentController {
 
     private final StudentServiceInterface studentService;
 
-    @PostMapping("/public/register")
+    @PostMapping("/private/student/register")
     public ResponseEntity<StudentResponseDto> createNewStudent(
             @Valid @RequestBody StudentLoginRequestDto studentRequestDto
     ){
@@ -30,14 +31,16 @@ public class StudentController {
 
     }
 
-    @GetMapping("/private/{id}")
+    @PreAuthorize("!(hasRole('STUDENT') and #studentId != principal.id)")
+    @GetMapping("/private/student/{id}")
     public ResponseEntity<StudentResponseDto> getStudentDetail(
             @PathVariable UUID id
             ){
         return studentService.getStudentDetail(id);
     }
 
-    @GetMapping("/private/attendance/{studentId}")
+    @PreAuthorize("!(hasRole('STUDENT') and #studentId != principal.id)")
+    @GetMapping("/private/student/attendance/{studentId}")
     public ResponseEntity<List<AttendanceRespondDto>> getAttendanceByStudentAndDateRange(
             @PathVariable UUID studentId,
             @RequestParam("start") @DateTimeFormat(iso = DateTimeFormat.ISO.DATE) LocalDate start,

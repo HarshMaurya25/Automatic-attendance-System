@@ -1,7 +1,7 @@
 package com.project.Attendance_System.Domain.Enum;
 
 public enum Authority {
-    PRINCIPLE,
+    PRINCIPAL,
     STUDENT,
     TEACHER,
     HOD,

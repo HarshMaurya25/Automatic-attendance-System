@@ -1,6 +1,5 @@
 package com.project.Attendance_System.Domain.Entity;
 
-import lombok.AllArgsConstructor;
 import org.springframework.security.core.GrantedAuthority;
 import org.springframework.security.core.authority.SimpleGrantedAuthority;
 import org.springframework.security.core.userdetails.UserDetails;
@@ -17,7 +16,11 @@ public class UserPrincipal implements UserDetails {
 
     @Override
     public Collection<? extends GrantedAuthority> getAuthorities() {
-        return Collections.singleton(new SimpleGrantedAuthority(user.getAuthority().toString()));
+        String role = user.getAuthority().toString();
+        if (!role.startsWith("ROLE_")) {
+            role = "ROLE_" + role;
+        }
+        return Collections.singleton(new SimpleGrantedAuthority(role));
     }
 
     @Override

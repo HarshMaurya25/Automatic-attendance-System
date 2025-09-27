@@ -10,6 +10,7 @@ import com.project.Attendance_System.Service.Interface.HODServiceInterface;
 import jakarta.validation.Valid;
 import lombok.AllArgsConstructor;
 import org.springframework.http.ResponseEntity;
+import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.stereotype.Controller;
 import org.springframework.web.bind.annotation.*;
 
@@ -18,40 +19,45 @@ import java.util.UUID;
 
 @Controller
 @AllArgsConstructor
-@RequestMapping("/api/v1/hod")
+@RequestMapping("/api/v1")
 public class HODController {
 
     private final HODServiceInterface hodService;
 
-    @PostMapping("/private/session-id/create")
+    @PreAuthorize("hasAnyRole('HOD' , 'PRINCIPAL' , 'ADMIN')")
+    @PostMapping("/private/hod/session-id/create")
     public ResponseEntity<LoginSessionRespondDto> createSessionID(
             @Valid @RequestBody LoginSessionRequestDto loginSessionRequestDto
             ){
         return hodService.createSessionLogin(loginSessionRequestDto);
     }
 
-    @PostMapping("/private/division/create")
+    @PreAuthorize("hasAnyRole('HOD' , 'PRINCIPAL' , 'ADMIN')")
+    @PostMapping("/private/hod/division/create")
     public ResponseEntity<DivisionResponseDto> createDivision(
             @Valid @RequestBody DivisionRequestDto dto
             ){
         return hodService.createDivision(dto);
     }
 
-    @GetMapping("/private/division/{id}")
+    @PreAuthorize("hasAnyRole('HOD' , 'PRINCIPAL' , 'ADMIN')")
+    @GetMapping("/private/hod/division/{id}")
     public ResponseEntity<List<DivisionResponseDto>> getAllDivision(
             @PathVariable UUID id
             ){
         return hodService.getDivisionInDepartment(id);
     }
 
-    @PostMapping("/private/department/create")
+    @PreAuthorize("hasAnyRole( 'PRINCIPAL' , 'ADMIN')")
+    @PostMapping("/private/hod/department/create")
     public ResponseEntity<DepartmentResponseDto> createDepartment(
             @Valid @RequestBody DepartmentRequestDto dto
     ) {
         return hodService.createDepartment(dto);
     }
 
-    @GetMapping("/private/department/{id}")
+    @PreAuthorize("hasAnyRole('PRINCIPAL' , 'ADMIN')")
+    @GetMapping("/private/hod/department/{id}")
     public ResponseEntity<DepartmentResponseDto> getDepartment(
             @PathVariable UUID id
     ) {

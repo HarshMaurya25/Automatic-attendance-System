@@ -1,8 +1,7 @@
 package com.project.Attendance_System.Controller;
 
 import com.project.Attendance_System.Domain.Dtos.User.LoginRequestDto;
-import com.project.Attendance_System.Domain.Entity.User;
-import com.project.Attendance_System.Repository.UserRepo;
+import com.project.Attendance_System.Domain.Dtos.User.RegisterRequestDto;
 import com.project.Attendance_System.Service.UserService;
 import lombok.AllArgsConstructor;
 import org.springframework.http.ResponseEntity;
@@ -10,8 +9,9 @@ import org.springframework.stereotype.Controller;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
+import org.springframework.web.bind.annotation.RestController;
 
-@Controller
+@RestController
 @AllArgsConstructor
 @RequestMapping("/api/v1/public")
 public class UserController {
@@ -20,9 +20,16 @@ public class UserController {
 
     @PostMapping("/new")
     public ResponseEntity<Boolean> createUser(
-            @RequestBody LoginRequestDto dto
+            @RequestBody RegisterRequestDto dto
     ){
         return ResponseEntity.ok().body(userService.createuser(dto));
 
+    }
+
+    @PostMapping("/login")
+    public ResponseEntity<String> loginUser(
+            @RequestBody LoginRequestDto dto
+            ){
+        return ResponseEntity.ok().body(userService.verify(dto));
     }
 }

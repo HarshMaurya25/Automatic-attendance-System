@@ -50,6 +50,10 @@ public class TeacherService implements TeacherServiceInterface {
                 .map(attendanceMapper::toDtoForCourse)
                 .toList();
 
+        if(attendanceResponseByCourseDtos.isEmpty()){
+            return ResponseEntity.notFound().build();
+        }
+
         return ResponseEntity.ok().body(attendanceResponseByCourseDtos);
     }
 }

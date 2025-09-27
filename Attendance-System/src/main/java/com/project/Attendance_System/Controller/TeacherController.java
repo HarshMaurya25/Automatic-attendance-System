@@ -4,6 +4,7 @@ import com.project.Attendance_System.Domain.Dtos.Attendance.AttendanceResponseBy
 import com.project.Attendance_System.Service.Interface.TeacherServiceInterface;
 import lombok.AllArgsConstructor;
 import org.springframework.http.ResponseEntity;
+import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.stereotype.Controller;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PathVariable;
@@ -14,12 +15,13 @@ import java.util.UUID;
 
 @Controller
 @AllArgsConstructor
-@RequestMapping("/api/v1/teacher")
+@RequestMapping("/api/v1")
 public class TeacherController {
 
     private final TeacherServiceInterface teacherService;
 
-    @GetMapping("/course/{courseId}/division/{divisionId}")
+    @PreAuthorize("!hasRole('STUDENT')")
+    @GetMapping("/private/teacher/course/{courseId}/division/{divisionId}")
     public ResponseEntity<List<AttendanceResponseByCourseDto>> getAttendanceByCourseAndDivision(
             @PathVariable UUID courseId,
             @PathVariable UUID divisionId

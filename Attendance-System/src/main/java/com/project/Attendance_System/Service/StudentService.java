@@ -93,6 +93,10 @@ public class StudentService implements StudentServiceInterface {
                 .map(attendanceMapper::toDto)
                 .toList();
 
+        if(attendanceRespondDto.isEmpty()){
+            return ResponseEntity.noContent().build();
+        }
+
         return ResponseEntity.ok().body(attendanceRespondDto);
     }
 }
