@@ -31,7 +31,7 @@ public class StudentController {
 
     }
 
-    @PreAuthorize("!(hasRole('STUDENT') and #studentId != principal.id)")
+    @PreAuthorize("!hasRole('STUDENT') or #studentId == principal.studentId")
     @GetMapping("/private/student/{id}")
     public ResponseEntity<StudentResponseDto> getStudentDetail(
             @PathVariable UUID id
@@ -39,7 +39,7 @@ public class StudentController {
         return studentService.getStudentDetail(id);
     }
 
-    @PreAuthorize("!(hasRole('STUDENT') and #studentId != principal.id)")
+    @PreAuthorize("!hasRole('STUDENT') or #studentId == principal.studentId")
     @GetMapping("/private/student/attendance/{studentId}")
     public ResponseEntity<List<AttendanceRespondDto>> getAttendanceByStudentAndDateRange(
             @PathVariable UUID studentId,

@@ -19,7 +19,7 @@ public class UserController {
     private final UserService userService;
 
     @PostMapping("/new")
-    public ResponseEntity<Boolean> createUser(
+    public ResponseEntity<String> createUser(
             @RequestBody RegisterRequestDto dto
     ){
         return ResponseEntity.ok().body(userService.createuser(dto));

@@ -6,12 +6,20 @@ import org.springframework.security.core.userdetails.UserDetails;
 
 import java.util.Collection;
 import java.util.Collections;
+import java.util.UUID;
 
 public class UserPrincipal implements UserDetails {
     private User user;
 
     public UserPrincipal(User user) {
         this.user = user;
+    }
+
+    public UUID getStudentId() {
+        if ("STUDENT".equals(user.getAuthority()) && user.getStudent() != null) {
+            return user.getStudent().getId();
+        }
+        return null;
     }
 
     @Override

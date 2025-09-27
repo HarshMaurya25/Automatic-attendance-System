@@ -26,13 +26,20 @@ public class UserService {
 
     private final JwtService jwtService;
 
-    public Boolean createuser(RegisterRequestDto dto){
+    public String createuser(RegisterRequestDto dto){
         User user = userMapper.fromLoginRequestDto(dto);
 
         user.setPassword(passwordEncoder.encode(dto.getPassword()));
 
         userRepo.save(user);
-        return true;
+
+        Authentication authentication = authmanager.authenticate(new UsernamePasswordAuthenticationToken(dto.getEmail() , dto.getPassword()));
+
+        if(authentication.isAuthenticated()){
+            return jwtService.generateToken(dto.getEmail());
+        }else{
+            throw new UsernameNotFoundException("UserName/Email and password is not found");
+        }
     }
 
     public String verify(LoginRequestDto dto) {
