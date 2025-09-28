@@ -17,9 +17,7 @@ import java.util.UUID;
 @NoArgsConstructor
 @Builder
 @Entity
-@Table(name = "students", indexes = {
-        @Index(name = "idx_student_email", columnList = "email")
-})
+@Table(name = "students")
 public class Student {
 
     @Id
@@ -37,10 +35,9 @@ public class Student {
     @Enumerated(EnumType.STRING)
     private Gender gender;
 
-    @Temporal(TemporalType.DATE)
     private LocalDate date_of_birth;
 
-    private String year;
+    private String academic_year;
 
     @ManyToOne
     @JoinColumn(name = "division")
