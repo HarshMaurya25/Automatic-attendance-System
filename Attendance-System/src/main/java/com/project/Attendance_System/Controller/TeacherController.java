@@ -1,6 +1,7 @@
 package com.project.Attendance_System.Controller;
 
 import com.project.Attendance_System.Domain.Dtos.Attendance.AttendanceResponseByCourseDto;
+import com.project.Attendance_System.Domain.Dtos.Teacher.TeacherResponseDto;
 import com.project.Attendance_System.Service.Interface.TeacherServiceInterface;
 import lombok.AllArgsConstructor;
 import org.springframework.http.ResponseEntity;
@@ -28,4 +29,13 @@ public class TeacherController {
     ) {
         return teacherService.getAttendanceByCourse(courseId, divisionId);
     }
+
+    @PreAuthorize("!hasRole('STUDENT')")
+    @GetMapping("/private/teacher/{id}")
+    public ResponseEntity<TeacherResponseDto> getTeacher(
+            @PathVariable UUID id
+    ){
+        return ResponseEntity.ok().body(teacherService.getTeacher(id));
+    }
+
 }
