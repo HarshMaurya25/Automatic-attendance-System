@@ -40,7 +40,6 @@ public class Student {
     @Temporal(TemporalType.DATE)
     private LocalDate date_of_birth;
 
-
     private String acadmic_year;
 
     @ManyToOne
