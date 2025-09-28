@@ -44,9 +44,7 @@ public class Attendance {
     @Enumerated(EnumType.STRING)
     private Status status;
 
-    @JsonIgnore
     @ManyToOne
-    @JoinColumn(name = "session")
-    private Session session;
-
+    @JoinColumn(name = "lecture_log_id")
+    private LectureLogs lectureLog;
 }

@@ -1,10 +1,12 @@
 package com.project.Attendance_System.Service;
 
 import com.project.Attendance_System.Domain.Dtos.Attendance.AttendanceRespondDto;
+import com.project.Attendance_System.Domain.Dtos.Lecture.GetAttendanceDto;
 import com.project.Attendance_System.Domain.Dtos.Student.StudentLoginRequestDto;
 import com.project.Attendance_System.Domain.Dtos.Student.StudentResponseDto;
 import com.project.Attendance_System.Domain.Entity.*;
 import com.project.Attendance_System.Domain.Enum.SessionType;
+import com.project.Attendance_System.Domain.Enum.Status;
 import com.project.Attendance_System.ExceptionHandler.Custom.LoginSessionIncorrectException;
 import com.project.Attendance_System.ExceptionHandler.Custom.VariableNotFound;
 import com.project.Attendance_System.Mapper.AttendanceMapper;
@@ -15,9 +17,11 @@ import com.project.Attendance_System.Service.Interface.StudentServiceInterface;
 import lombok.AllArgsConstructor;
 import lombok.Data;
 import org.springframework.http.ResponseEntity;
+import org.springframework.messaging.simp.SimpMessagingTemplate;
 import org.springframework.security.core.userdetails.UsernameNotFoundException;
 import org.springframework.stereotype.Service;
 
+import java.rmi.ServerError;
 import java.time.LocalDate;
 import java.util.List;
 import java.util.UUID;
@@ -30,6 +34,9 @@ public class StudentService implements StudentServiceInterface {
     private final StudentMapper studentMapper;
     private final AttendanceMapper attendanceMapper;
     private final UserMapper userMapper;
+    private final SimpMessagingTemplate messagingTemplate;
+
+    private final LectureService lectureService;
 
     private final StudentsRepo studentsRepo;
     private final LoginSessionRepo loginSessionRepo;
@@ -39,6 +46,10 @@ public class StudentService implements StudentServiceInterface {
 
     @Override
     public ResponseEntity<StudentResponseDto> createNewStudent(StudentLoginRequestDto dto) {
+        if(studentsRepo.existsByEmail(dto.getEmail())){
+            throw new RuntimeException("User Already Exist");
+        }
+
         UUID sessionId = UUID.fromString(dto.getSession_code());
         LoginSessions loginSession = loginSessionRepo.findById(sessionId)
                 .orElseThrow(() -> new LoginSessionIncorrectException("Login Session not found"));
@@ -99,4 +110,30 @@ public class StudentService implements StudentServiceInterface {
 
         return ResponseEntity.ok().body(attendanceRespondDto);
     }
+
+    @Override
+    public String getAttendance(GetAttendanceDto dto) {
+        Student student = studentsRepo.findById(dto.getStudentId())
+                .orElseThrow(() -> new VariableNotFound("Student"));
+
+        if (!lectureService.checkLecture(dto.getSessionID(), dto.getQr_id())) {
+            throw new VariableNotFound("Lecture");
+        }
+
+        Attendance attendance = attendanceRepo.findByLectureLogIdAndStudentId(dto.getSessionID(), dto.getStudentId());
+
+        if(attendance == null){
+            throw new VariableNotFound("Attendance");
+        }
+
+        attendance.setStatus(Status.PRESENT);
+        attendanceRepo.save(attendance);
+
+        UUID teacherId = attendance.getTeacher().getId();
+        messagingTemplate.convertAndSend("/topic/teacher/" + teacherId,
+                "Student " + dto.getStudentId() + " marked PRESENT");
+
+        return "Attendance marked successfully";
+    }
+
 }

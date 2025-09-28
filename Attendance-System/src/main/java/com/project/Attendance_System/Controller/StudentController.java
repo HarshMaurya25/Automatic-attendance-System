@@ -1,6 +1,7 @@
 package com.project.Attendance_System.Controller;
 
 import com.project.Attendance_System.Domain.Dtos.Attendance.AttendanceRespondDto;
+import com.project.Attendance_System.Domain.Dtos.Lecture.GetAttendanceDto;
 import com.project.Attendance_System.Domain.Dtos.Student.StudentLoginRequestDto;
 import com.project.Attendance_System.Domain.Dtos.Student.StudentResponseDto;
 import com.project.Attendance_System.Service.Interface.StudentServiceInterface;
@@ -49,4 +50,13 @@ public class StudentController {
 
         return studentService.getStudentAttendance(studentId , start , end);
     }
+
+    @PreAuthorize("!hasRole('STUDENT') or #studentId == principal.studentId")
+    @PostMapping("/private/student/lecture/get-attendance")
+    public ResponseEntity<String> getAttendance(
+            @RequestBody GetAttendanceDto dto
+            ){
+        return ResponseEntity.ok().body(studentService.getAttendance(dto));
+    }
+
 }
