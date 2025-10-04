@@ -35,10 +35,8 @@ public class Attendance {
     @OneToOne(mappedBy = "attendance" , cascade = CascadeType.ALL , fetch = FetchType.LAZY)
     private Staff teacher;
 
-    @Temporal(TemporalType.TIME)
     private LocalTime time;
 
-    @Temporal(TemporalType.DATE)
     private LocalDate date;
 
     @Enumerated(EnumType.STRING)

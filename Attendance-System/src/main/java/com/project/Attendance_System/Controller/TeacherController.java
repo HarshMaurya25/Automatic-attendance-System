@@ -1,15 +1,15 @@
 package com.project.Attendance_System.Controller;
 
 import com.project.Attendance_System.Domain.Dtos.Attendance.AttendanceResponseByCourseDto;
+import com.project.Attendance_System.Domain.Dtos.Lecture.CreateLectureDto;
 import com.project.Attendance_System.Domain.Dtos.Teacher.TeacherResponseDto;
 import com.project.Attendance_System.Service.Interface.TeacherServiceInterface;
+import com.project.Attendance_System.Service.LectureService;
 import lombok.AllArgsConstructor;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.stereotype.Controller;
-import org.springframework.web.bind.annotation.GetMapping;
-import org.springframework.web.bind.annotation.PathVariable;
-import org.springframework.web.bind.annotation.RequestMapping;
+import org.springframework.web.bind.annotation.*;
 
 import java.util.List;
 import java.util.UUID;
@@ -20,6 +20,7 @@ import java.util.UUID;
 public class TeacherController {
 
     private final TeacherServiceInterface teacherService;
+    private final LectureService lectureService;
 
     @PreAuthorize("!hasRole('STUDENT')")
     @GetMapping("/private/teacher/course/{courseId}/division/{divisionId}")
@@ -37,5 +38,14 @@ public class TeacherController {
     ){
         return ResponseEntity.ok().body(teacherService.getTeacher(id));
     }
+
+    @PreAuthorize("!hasRole('STUDENT')")
+    @PostMapping("/private/lecture/create")
+    public ResponseEntity<UUID> createLecture(
+            @RequestBody CreateLectureDto dto
+            ){
+        return ResponseEntity.ok().body(lectureService.createLecture(dto));
+    }
+
 
 }

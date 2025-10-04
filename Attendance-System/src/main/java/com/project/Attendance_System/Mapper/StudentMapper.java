@@ -16,7 +16,11 @@ public class StudentMapper {
                 .father_name(dto.getFather_name())
                 .gender(dto.getGender())
                 .roll_number(dto.getRoll_number())
+<<<<<<< HEAD
                 .acadmic_year(dto.getYear())
+=======
+                .academic_year(dto.getYear())
+>>>>>>> H2_Data
                 .date_of_birth(dto.getDate_of_birth())
                 .address(dto.getAddress())
                 .State(dto.getState())
@@ -34,7 +38,11 @@ public class StudentMapper {
                 .father_name(student.getFather_name())
                 .gender(student.getGender())
                 .roll_number(student.getRoll_number())
+<<<<<<< HEAD
                 .year(student.getAcadmic_year())
+=======
+                .year(student.getAcademic_year())
+>>>>>>> H2_Data
                 .division_name(student.getDivision().getName())
                 .department_name(student.getDepartment().getName())
                 .college_name(student.getCollege().getName())

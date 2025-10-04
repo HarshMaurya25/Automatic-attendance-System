@@ -6,6 +6,8 @@ import com.project.Attendance_System.Domain.Entity.*;
 import com.project.Attendance_System.ExceptionHandler.Custom.VariableNotFound;
 import com.project.Attendance_System.Mapper.LectureMapper;
 import com.project.Attendance_System.Repository.*;
+
+import jakarta.transaction.Transactional;
 import lombok.AllArgsConstructor;
 import org.springframework.stereotype.Service;
 
@@ -30,16 +32,17 @@ public class LectureService {
     private final StaffRepo staffRepo;
     private final LectureLogsRepo lectureLogsRepo;
 
-    private final Map<UUID , String> activeSession = new ConcurrentHashMap<>();
+    private final Map<UUID, String> activeSession = new ConcurrentHashMap<>();
 
     public void qrupdate(QrUpdateDto dto) {
-        if(!activeSession.containsKey(dto.getSession_id())){
-            throw  new VariableNotFound("Lecture");
+        if (!activeSession.containsKey(dto.getSession_id())) {
+            throw new VariableNotFound("Lecture");
         }
-        activeSession.put(dto.getSession_id() , dto.getQr_id());
+        activeSession.put(dto.getSession_id(), dto.getQr_id());
     }
 
-    public UUID createLecture(CreateLectureDto dto){
+    @Transactional
+    public UUID createLecture(CreateLectureDto dto) {
         Division division = divisionRepo.findById(dto.getDivision_id())
                 .orElseThrow(() -> new VariableNotFound("Division"));
 
@@ -53,7 +56,7 @@ public class LectureService {
         lectureLogsRepo.save(lectureLogs);
 
         List<Attendance> attendances = new ArrayList<>();
-        for(Student student : division.getStudent()){
+        for (Student student : division.getStudent()) {
             Attendance attendance = lectureMapper.toEntity(course, division, teacher);
             attendance.setStudent(student);
             attendance.setLectureLog(lectureLogs);
@@ -65,21 +68,20 @@ public class LectureService {
         lectureLogs.setAttendances(attendances);
         lectureLogsRepo.save(lectureLogs);
 
-        activeSession.put(lectureLogs.getId() , dto.getQr_id());
+        activeSession.put(lectureLogs.getId(), dto.getQr_id());
 
         return lectureLogs.getId();
     }
 
-    public boolean checkLecture(UUID id , String qr_id){
-        if(!activeSession.containsKey(id)){
-            throw  new VariableNotFound("Lecture");
+    public boolean checkLecture(UUID id, String qr_id) {
+        if (!activeSession.containsKey(id)) {
+            throw new VariableNotFound("Lecture");
         }
-        if(activeSession.get(id).equals(qr_id)){
+        if (activeSession.get(id).equals(qr_id)) {
             return true;
-        }else{
+        } else {
             return false;
         }
     }
-
 
 }

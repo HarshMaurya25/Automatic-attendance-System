@@ -1,0 +1,45 @@
+@startuml
+actor Student
+participant "StudentController" as Controller
+participant "JwtFilter" as JwtFilter
+participant "LectureService" as LectureService
+participant "StudentsRepo" as StudentsRepo
+participant "AttendanceRepo" as AttendanceRepo
+participant "SimpMessagingTemplate" as MessagingTemplate
+database "students (DB)" as StudentsDB
+database "attendances (DB)" as AttendanceDB
+== Student marks attendance ==
+Student -> Controller: POST /private/student/lecture/get-attendance (GetAttendanceDto)
+Controller -> JwtFilter: (SecurityContext already set by JwtFilter earlier)
+Controller -> LectureService: checkLecture(sessionId, qr_id)
+LectureService -> LectureService: activeSession.containsKey(sessionId)?
+alt session absent
+    LectureService --> Controller: throw VariableNotFound(Lecture)
+    Controller --> Student: 4xx error
+else session present
+    LectureService -> LectureService: activeSession.get(sessionId) == qr_id?
+    alt mismatch
+        LectureService --> Controller: throw VariableNotFound(Lecture)
+        Controller --> Student: 4xx error
+    else match
+        Controller -> StudentsRepo: findById(studentId)
+        StudentsRepo -> StudentsDB: SELECT student
+        StudentsDB --> StudentsRepo: student entity
+        StudentsRepo --> Controller: student
+        Controller -> AttendanceRepo: findByLectureLogIdAndStudentId(sessionId, studentId)
+        AttendanceRepo -> AttendanceDB: SELECT attendance
+        AttendanceDB --> AttendanceRepo: attendance
+        alt attendance null
+            AttendanceRepo --> Controller: null -> throw VariableNotFound
+            Controller --> Student: 4xx
+        else attendance found
+            Controller -> AttendanceRepo: save(attendance.status = PRESENT)
+            AttendanceRepo -> AttendanceDB: UPDATE attendance.status
+            AttendanceDB --> AttendanceRepo: success
+            Controller -> MessagingTemplate: convertAndSend("/topic/teacher/"+teacherId, "Student X marked PRESENT")
+            MessagingTemplate --> TeacherSubscribers: message
+            Controller --> Student: 200 OK (success)
+        end
+    end
+end
+@enduml

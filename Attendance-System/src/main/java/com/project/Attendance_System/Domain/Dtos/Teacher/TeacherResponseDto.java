@@ -24,9 +24,13 @@ public class TeacherResponseDto {
 
     private Gender gender;
 
-    private Department department;
+    private String department;
 
-    private College college;
+    private UUID department_id;
+
+    private String college;
+
+    private UUID college_id;
 
     private String position;
 
