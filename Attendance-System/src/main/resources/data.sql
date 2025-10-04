@@ -15,7 +15,7 @@ INSERT INTO courses (id, name, course_code, college, semester, department) VALUE
 
 --------------------------------------STAFF--------------------------------------------------------------------------
 -- HOD
---password : sushama
+--password : sushma
 INSERT INTO users (email, authority, password) VALUES
 ('sushama@hod.xavier.in', 'HOD', '$2a$12$a2r.nHGl7yhW3bnV4oClU.WNAX3oL4KXUmQB3Jt3EXfosTnODSuRK');
 

@@ -46,7 +46,7 @@ public class StudentService implements StudentServiceInterface {
 
     @Override
     public ResponseEntity<StudentResponseDto> createNewStudent(StudentLoginRequestDto dto) {
-        if(studentsRepo.existsByEmail(dto.getEmail())){
+        if (studentsRepo.existsByEmail(dto.getEmail())) {
             throw new RuntimeException("User Already Exist");
         }
 
@@ -54,11 +54,9 @@ public class StudentService implements StudentServiceInterface {
         LoginSessions loginSession = loginSessionRepo.findById(sessionId)
                 .orElseThrow(() -> new LoginSessionIncorrectException("Login Session not found"));
 
-
         if (!loginSession.getSession_type().equals(SessionType.STUDENT)) {
             throw new LoginSessionIncorrectException(
-                    "Login Session is Incorrect: " + loginSession.getSession_type()
-            );
+                    "Login Session is Incorrect: " + loginSession.getSession_type());
         }
 
         Student student = studentMapper.ToStudent(dto);
@@ -72,7 +70,7 @@ public class StudentService implements StudentServiceInterface {
 
         User user = userRepo.findById(dto.getEmail())
                 .orElseThrow(() -> new UsernameNotFoundException("User not found: " + dto.getEmail()));
-        if(user == null){
+        if (user == null) {
             throw new UsernameNotFoundException("user is not found " + dto.getEmail());
         }
 
@@ -84,27 +82,27 @@ public class StudentService implements StudentServiceInterface {
         return ResponseEntity.ok(responseDto);
     }
 
-    public ResponseEntity<StudentResponseDto> getStudentDetail(UUID id){
+    public ResponseEntity<StudentResponseDto> getStudentDetail(UUID id) {
         Student student = studentsRepo.findById(id)
-                .orElseThrow(()-> new VariableNotFound("Student"));
+                .orElseThrow(() -> new VariableNotFound("Student"));
 
         StudentResponseDto studentResponseDto = studentMapper.ToStudentResponseDto(student);
 
         return ResponseEntity.ok().body(studentResponseDto);
     }
 
-    public ResponseEntity<List<AttendanceRespondDto>> getStudentAttendance(UUID id , LocalDate start , LocalDate end){
+    public ResponseEntity<List<AttendanceRespondDto>> getStudentAttendance(UUID id, LocalDate start, LocalDate end) {
 
-        Student student = studentsRepo.findById(id).orElseThrow(()-> new VariableNotFound("Student"));
+        Student student = studentsRepo.findById(id).orElseThrow(() -> new VariableNotFound("Student"));
 
         List<Attendance> attendances = attendanceRepo
-                .findByStudentIdAndDateBetweenOrderByDateAscTimeAsc( student.getId(), start , end);
+                .findByStudentIdAndDateBetweenOrderByDateAscTimeAsc(student.getId(), start, end);
 
         List<AttendanceRespondDto> attendanceRespondDto = attendances.stream()
                 .map(attendanceMapper::toDto)
                 .toList();
 
-        if(attendanceRespondDto.isEmpty()){
+        if (attendanceRespondDto.isEmpty()) {
             return ResponseEntity.noContent().build();
         }
 
@@ -113,27 +111,14 @@ public class StudentService implements StudentServiceInterface {
 
     @Override
     public String getAttendance(GetAttendanceDto dto) {
-        Student student = studentsRepo.findById(dto.getStudentId())
-                .orElseThrow(() -> new VariableNotFound("Student"));
+        int updated = attendanceRepo.markPresent(dto.getSessionID(), dto.getStudentId());
 
-        if (!lectureService.checkLecture(dto.getSessionID(), dto.getQr_id())) {
-            throw new VariableNotFound("Lecture");
+        if (updated == 0) {
+            throw new RuntimeException("Attendance record not found or already marked.");
+        }
         }
 
-        Attendance attendance = attendanceRepo.findByLectureLogIdAndStudentId(dto.getSessionID(), dto.getStudentId());
-
-        if(attendance == null){
-            throw new VariableNotFound("Attendance");
-        }
-
-        attendance.setStatus(Status.PRESENT);
-        attendanceRepo.save(attendance);
-
-        UUID teacherId = attendance.getTeacher().getId();
-        messagingTemplate.convertAndSend("/topic/teacher/" + teacherId,
-                "Student " + dto.getStudentId() + " marked PRESENT");
-
-        return "Attendance marked successfully";
-    }
+    return"Attendance marked successfully";
+}
 
 }

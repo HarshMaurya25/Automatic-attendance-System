@@ -1,0 +1,39 @@
+@startuml
+actor Teacher
+participant "TeacherController" as Controller
+participant "LectureService" as LectureService
+participant "DivisionRepo" as DivisionRepo
+participant "CourseRepo" as CourseRepo
+participant "StaffRepo" as StaffRepo
+participant "LectureLogsRepo" as LectureLogsRepo
+participant "LectureMapper" as LectureMapper
+participant "AttendanceRepo" as AttendanceRepo
+database "lecture_logs (DB)" as LectureLogsDB
+database "attendances (DB)" as AttendanceDB
+== Teacher creates lecture ==
+Teacher -> Controller: POST /private/lecture/create (CreateLectureDto)
+Controller -> LectureService: createLecture(dto)
+LectureService -> DivisionRepo: findById(divisionId)
+DivisionRepo --> LectureService: Division
+LectureService -> CourseRepo: findById(courseId)
+CourseRepo --> LectureService: Course
+LectureService -> StaffRepo: findById(teacherId)
+StaffRepo --> LectureService: Staff
+LectureService -> LectureLogsRepo: save(new LectureLogs)
+LectureLogsRepo -> LectureLogsDB: INSERT lecture_logs -> id
+LectureLogsDB --> LectureLogsRepo: lectureLogs entity (id)
+LectureLogsRepo --> LectureService: saved lectureLogs
+LectureService -> LectureMapper: toEntity(course, division, staff)
+LectureMapper --> LectureService: Attendance (ABSENT)
+loop for each student in division
+    LectureService -> AttendanceRepo: prepare attendance (set student, lectureLog)
+end
+LectureService -> AttendanceRepo: saveAll(attendances)
+AttendanceRepo -> AttendanceDB: INSERT multiple attendances
+AttendanceDB --> AttendanceRepo: persisted attendances
+LectureService -> LectureLogsRepo: save(lectureLogs with attendances)
+LectureLogsRepo -> LectureLogsDB: UPDATE lecture_logs (link attendances)
+LectureService -> LectureService: activeSession.put(lectureLogs.id, dto.qr_id)
+LectureService --> Controller: return lectureLogs.id
+Controller --> Teacher: 200 OK (lectureId)
+@enduml

@@ -32,7 +32,6 @@ public class StudentController {
 
     }
 
-    @PreAuthorize("!hasRole('STUDENT') or #studentId == principal.studentId")
     @GetMapping("/private/student/{id}")
     public ResponseEntity<StudentResponseDto> getStudentDetail(
             @PathVariable UUID id
@@ -40,7 +39,6 @@ public class StudentController {
         return studentService.getStudentDetail(id);
     }
 
-    @PreAuthorize("!hasRole('STUDENT') or #studentId == principal.studentId")
     @GetMapping("/private/student/attendance/{studentId}")
     public ResponseEntity<List<AttendanceRespondDto>> getAttendanceByStudentAndDateRange(
             @PathVariable UUID studentId,
@@ -51,7 +49,6 @@ public class StudentController {
         return studentService.getStudentAttendance(studentId , start , end);
     }
 
-    @PreAuthorize("!hasRole('STUDENT') or #studentId == principal.studentId")
     @PostMapping("/private/student/lecture/get-attendance")
     public ResponseEntity<String> getAttendance(
             @RequestBody GetAttendanceDto dto

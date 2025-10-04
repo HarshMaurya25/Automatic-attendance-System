@@ -16,22 +16,21 @@ import java.util.List;
 import java.util.UUID;
 
 @Repository
-public interface AttendanceRepo extends JpaRepository<Attendance , UUID> {
+public interface AttendanceRepo extends JpaRepository<Attendance, UUID> {
 
-    List<Attendance> findByStudentIdAndDateBetweenOrderByDateAscTimeAsc(
-            UUID student, LocalDate start, LocalDate end);
+        List<Attendance> findByStudentIdAndDateBetweenOrderByDateAscTimeAsc(
+                        UUID student, LocalDate start, LocalDate end);
 
-    @Query("SELECT a FROM Attendance a WHERE a.course.id = :courseId AND a.division.id = :divisionId ORDER BY a.date ASC, a.time ASC")
-    List<Attendance> findAllByCourseAndDivisionOrderByDateAscTimeAsc(Course course, Division division);
+        @Query("SELECT a FROM Attendance a WHERE a.course.id = :courseId AND a.division.id = :divisionId ORDER BY a.date ASC, a.time ASC")
+        List<Attendance> findAllByCourseAndDivisionOrderByDateAscTimeAsc(Course course, Division division);
 
-    List<Attendance> findAllByStudent(Student student);
+        List<Attendance> findAllByStudent(Student student);
 
-    @Modifying
-    @Transactional
-    @Query("UPDATE Attendance a SET a.status = 'PRESENT' " +
-            "WHERE a.lectureLog.id = :lectureLogId AND a.student.id = :studentId")
-    int markPresent(@Param("lectureLogId") UUID lectureLogId,
-                    @Param("studentId") UUID studentId);
+        @Modifying
+        @Transactional
+        @Query("UPDATE Attendance a SET a.status = 'PRESENT' WHERE a.lectureLog.id = :lectureLogId AND a.student.id = :studentId")
+        int markPresent(@Param("lectureLogId") UUID lectureLogId,
+                        @Param("studentId") UUID studentId);
 
-    Attendance findByLectureLogIdAndStudentId(UUID sessionID, UUID studentId);
+        Attendance findByLectureLogIdAndStudentId(UUID sessionID, UUID studentId);
 }

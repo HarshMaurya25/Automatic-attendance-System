@@ -1,0 +1,39 @@
+@startuml
+actor Client
+participant "Dispatcher/Servlet" as Servlet
+participant "JwtFilter (OncePerRequestFilter)" as JwtFilter
+participant "JwtService" as JwtService
+participant "UserDetailService" as UserDetailService
+database "users (DB)" as DB
+participant "SecurityContextHolder" as SecurityContext
+participant "Controller" as Controller
+== Request arrives ==
+Client -> Servlet: POST /private/...
+Servlet -> JwtFilter: filter(request)
+JwtFilter -> JwtFilter: check path (/api/v1/public?)
+alt public path
+    JwtFilter -> Servlet: filterChain.doFilter (no auth)
+else not public
+    JwtFilter -> JwtFilter: authHeader = Authorization
+    alt header present
+        JwtFilter -> JwtService: extractUserName(token)
+        JwtService --> JwtFilter: username
+        JwtFilter -> UserDetailService: loadUserByUsername(username)
+        UserDetailService -> DB: SELECT * FROM users WHERE email=?
+        DB --> UserDetailService: user row
+        UserDetailService --> JwtFilter: UserPrincipal
+        JwtFilter -> JwtService: validateToken(token, userDetails)
+        JwtService --> JwtFilter: boolean
+        alt valid
+            JwtFilter -> SecurityContext: set Authentication (UserPrincipal, authorities)
+        else invalid
+            JwtFilter --> Servlet: continue without Authentication
+        end
+    else no header
+        JwtFilter --> Servlet: continue without Authentication
+    end
+end
+Servlet -> Controller: invoke controller
+Controller -> SecurityContext: SecurityContext holds Authentication
+Controller --> Client: Response
+@enduml

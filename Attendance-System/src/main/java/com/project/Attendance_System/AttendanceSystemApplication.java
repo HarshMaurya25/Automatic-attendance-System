@@ -3,7 +3,7 @@ package com.project.Attendance_System;
 import org.springframework.boot.SpringApplication;
 import org.springframework.boot.autoconfigure.SpringBootApplication;
 
-@SpringBootApplication
+@SpringBootApplication(scanBasePackages = "com.project.Attendance_System")
 public class AttendanceSystemApplication {
 
 	public static void main(String[] args) {

@@ -22,6 +22,10 @@ public class UserPrincipal implements UserDetails {
         return null;
     }
 
+    public UUID getId() {
+        return getStudentId();
+    }
+
     @Override
     public Collection<? extends GrantedAuthority> getAuthorities() {
         String role = user.getAuthority().toString();
