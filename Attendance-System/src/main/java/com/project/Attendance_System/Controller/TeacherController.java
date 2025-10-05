@@ -2,6 +2,7 @@ package com.project.Attendance_System.Controller;
 
 import com.project.Attendance_System.Domain.Dtos.Attendance.AttendanceResponseByCourseDto;
 import com.project.Attendance_System.Domain.Dtos.Lecture.CreateLectureDto;
+import com.project.Attendance_System.Domain.Dtos.Lecture.CreateLectureResponse;
 import com.project.Attendance_System.Domain.Dtos.Teacher.TeacherResponseDto;
 import com.project.Attendance_System.Service.Interface.TeacherServiceInterface;
 import com.project.Attendance_System.Service.LectureService;
@@ -41,7 +42,7 @@ public class TeacherController {
 
     @PreAuthorize("!hasRole('STUDENT')")
     @PostMapping("/private/lecture/create")
-    public ResponseEntity<UUID> createLecture(
+    public ResponseEntity<CreateLectureResponse> createLecture(
             @RequestBody CreateLectureDto dto
             ){
         return ResponseEntity.ok().body(lectureService.createLecture(dto));

@@ -70,7 +70,7 @@ public class AttendanceService implements AttendanceServiceInterface {
         Division division = divisionRepo.findById(divisionId)
                 .orElseThrow(() -> new VariableNotFound("Division"));
 
-        List<Student> students = division.getStudent();  // assuming one-to-many mapping in Division entity
+        List<Student> students = division.getStudent();
 
         return students.stream().map(student -> {
             List<Attendance> attendances = attendanceRepo.findAllByStudent(student);

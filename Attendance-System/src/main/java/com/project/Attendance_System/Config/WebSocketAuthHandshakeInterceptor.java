@@ -25,30 +25,17 @@ public class WebSocketAuthHandshakeInterceptor implements HandshakeInterceptor {
     @Override
     public boolean beforeHandshake(ServerHttpRequest request, ServerHttpResponse response,
             WebSocketHandler wsHandler, Map<String, Object> attributes) throws Exception {
-        // If underlying request is servlet-based, we can access headers and query
-        // params
+        System.out.println("Handshake attempt: " + request.getURI());
         if (request instanceof ServletServerHttpRequest servletRequest) {
             HttpServletRequest httpServletRequest = servletRequest.getServletRequest();
-
-            // 1) Prefer Authorization header
             String authHeader = httpServletRequest.getHeader("Authorization");
-            if (authHeader != null && authHeader.startsWith("Bearer ")) {
-                String token = authHeader.substring(7);
-                attributes.put("ws_token", token);
-                return true;
+            if (authHeader == null || authHeader.isBlank()) {
+                authHeader = httpServletRequest.getParameter("token");
             }
-
-            // 2) Fallback to query param: ?token=<jwt>
-            String qtoken = httpServletRequest.getParameter("token");
-            if (qtoken != null && !qtoken.isEmpty()) {
-                attributes.put("ws_token", qtoken);
-                return true;
+            if (authHeader != null && authHeader.startsWith("Bearer ")) {
+                attributes.put("ws_token", authHeader.substring(7));
             }
         }
-
-        // No token found, allow the handshake to continue but applications should
-        // reject unauthorized STOMP frames.
-        // Alternatively return false to reject the handshake.
         return true;
     }
 

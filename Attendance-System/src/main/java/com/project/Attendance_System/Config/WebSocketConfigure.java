@@ -11,19 +11,20 @@ import org.springframework.web.socket.config.annotation.WebSocketMessageBrokerCo
 public class WebSocketConfigure implements WebSocketMessageBrokerConfigurer {
 
     @Override
-    public void configureMessageBroker(MessageBrokerRegistry config){
-//        Send Msg to Teacher by the socket
+    public void configureMessageBroker(MessageBrokerRegistry config) {
+        // Send Msg to Teacher by the socket
         config.enableSimpleBroker("/topic");
 
-//        Teacher send to Server
+        // Teacher send to Server
         config.setApplicationDestinationPrefixes("/app");
 
     }
 
     @Override
-    public void registerStompEndpoints(StompEndpointRegistry registry){
+    public void registerStompEndpoints(StompEndpointRegistry registry) {
         registry.addEndpoint("/ws")
-                .setAllowedOriginPatterns("*")
-                .withSockJS();
+                .setAllowedOriginPatterns("*") // allow for dev; lock to origins in production
+                .addInterceptors(new WebSocketAuthHandshakeInterceptor())
+                .withSockJS(); // keep SockJS if you need fallbacks
     }
 }

@@ -42,6 +42,8 @@ public class StudentService implements StudentServiceInterface {
     private final UserMapper userMapper;
     private final SimpMessagingTemplate messagingTemplate;
 
+    private final SessionMappingService sessionMappingService;
+
     private final LectureService lectureService;
 
     private final StudentsRepo studentsRepo;
@@ -125,15 +127,28 @@ public class StudentService implements StudentServiceInterface {
         return ResponseEntity.ok().body(attendanceRespondDto);
     }
 
-    @Override
     public String getAttendance(GetAttendanceDto dto) {
+        if(!lectureService.checkLecture(dto.getSessionID() , dto.getQr_id())){
+            throw new RuntimeException("Wrong QR ID");
+        }
+        log.info("Student {} wants to get attendance at {}", dto.getStudentId(), dto.getSessionID());
         int updated = attendanceRepo.markPresent(dto.getSessionID(), dto.getStudentId());
+        log.info("Student {} update {} row", dto.getStudentId(), updated);
 
         if (updated == 0) {
             throw new RuntimeException("Attendance record not found or already marked.");
         }
+        if (dto.getSessionID() != null) {
+            messagingTemplate.convertAndSend(
+                    "/topic/" + dto.getSessionID(),
+                    dto.getStudentId() + " marked present"
+            );
+            System.out.println("Sent message to session " + dto.getSessionID().toString()+ ": " + dto.getStudentId() + " marked present");
+        } else {
+            log.warn("No username mapped for session {}", dto.getSessionID());
+        }
 
-    return"Attendance marked successfully";
-}
+        return "Attendance marked successfully";
+    }
 
 }

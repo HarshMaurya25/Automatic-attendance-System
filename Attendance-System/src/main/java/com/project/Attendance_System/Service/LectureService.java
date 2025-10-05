@@ -1,6 +1,7 @@
 package com.project.Attendance_System.Service;
 
 import com.project.Attendance_System.Domain.Dtos.Lecture.CreateLectureDto;
+import com.project.Attendance_System.Domain.Dtos.Lecture.CreateLectureResponse;
 import com.project.Attendance_System.Domain.Dtos.Lecture.QrUpdateDto;
 import com.project.Attendance_System.Domain.Entity.*;
 import com.project.Attendance_System.ExceptionHandler.Custom.VariableNotFound;
@@ -9,14 +10,13 @@ import com.project.Attendance_System.Repository.*;
 
 import jakarta.transaction.Transactional;
 import lombok.AllArgsConstructor;
+import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
 
-import java.util.ArrayList;
-import java.util.List;
-import java.util.Map;
-import java.util.UUID;
+import java.util.*;
 import java.util.concurrent.ConcurrentHashMap;
 
+@Slf4j
 @Service
 @AllArgsConstructor
 public class LectureService {
@@ -36,13 +36,14 @@ public class LectureService {
 
     public void qrupdate(QrUpdateDto dto) {
         if (!activeSession.containsKey(dto.getSession_id())) {
-            throw new VariableNotFound("Lecture");
+            throw new VariableNotFound("Lecture is not found during the QR update");
         }
         activeSession.put(dto.getSession_id(), dto.getQr_id());
+        log.info("{} lecture is updated to {}" , dto.getSession_id() , dto.getQr_id());
     }
 
     @Transactional
-    public UUID createLecture(CreateLectureDto dto) {
+    public CreateLectureResponse createLecture(CreateLectureDto dto) {
         Division division = divisionRepo.findById(dto.getDivision_id())
                 .orElseThrow(() -> new VariableNotFound("Division"));
 
@@ -55,28 +56,35 @@ public class LectureService {
         LectureLogs lectureLogs = LectureLogs.builder().build();
         lectureLogsRepo.save(lectureLogs);
 
+        Map<UUID , String> students = new HashMap<>();
         List<Attendance> attendances = new ArrayList<>();
         for (Student student : division.getStudent()) {
             Attendance attendance = lectureMapper.toEntity(course, division, teacher);
             attendance.setStudent(student);
             attendance.setLectureLog(lectureLogs);
             attendances.add(attendance);
+            students.put(student.getId() , student.getFirst_name()+ " " + student.getSurname());
         }
 
         attendanceRepo.saveAll(attendances);
 
         lectureLogs.setAttendances(attendances);
         lectureLogsRepo.save(lectureLogs);
-
         activeSession.put(lectureLogs.getId(), dto.getQr_id());
 
-        return lectureLogs.getId();
+        CreateLectureResponse createLectureResponse = CreateLectureResponse.builder()
+                .id(lectureLogs.getId())
+                .students(students)
+                .build();
+        return createLectureResponse;
     }
 
     public boolean checkLecture(UUID id, String qr_id) {
         if (!activeSession.containsKey(id)) {
             throw new VariableNotFound("Lecture");
         }
+
+        System.out.println("ID have " + activeSession.get(id));
         if (activeSession.get(id).equals(qr_id)) {
             return true;
         } else {

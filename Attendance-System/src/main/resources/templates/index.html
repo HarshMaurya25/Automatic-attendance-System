@@ -1,0 +1,107 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <title>QR Updates Dashboard</title>
+    <style>
+      body {
+        font-family: Arial, sans-serif;
+        padding: 20px;
+      }
+      input,
+      button {
+        padding: 6px;
+        margin: 5px 0;
+        width: 200px;
+      }
+      button {
+        background-color: purple;
+        color: white;
+        border: none;
+        cursor: pointer;
+      }
+      button:hover {
+        background-color: darkmagenta;
+      }
+      #notifications p {
+        margin: 5px 0;
+      }
+    </style>
+  </head>
+  <body>
+    <h1>QR Update Notifications</h1>
+    <div id="notifications"></div>
+
+    <input type="text" id="type" placeholder="Type" />
+    <input type="text" id="session_id" placeholder="Session UUID" />
+    <input type="text" id="qr_id" placeholder="QR ID" />
+    <br />
+    <button onclick="sendQrUpdate()">Send QR Update</button>
+
+    <!-- Load libraries -->
+    <script src="https://cdn.jsdelivr.net/npm/sockjs-client@1.6.1/dist/sockjs.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/stompjs@2.3.3/lib/stomp.min.js"></script>
+    <script>
+      let session_id = null;
+      const token =
+        "eyJhbGciOiJIUzI1NiJ9.eyJzdWIiOiJzdXNoYW1hQGhvZC54YXZpZXIuaW4iLCJpYXQiOjE3NTk2NjUxMzcsImV4cCI6MTc2MjI1NzEzN30.NPaONe6Om3aXxpsC7ykhN1YLBcWcTTfIvfY2W_p0llc"; // replace with valid JWT
+      let stompClient = null;
+      let subscribedSessions = new Set(); // track subscriptions
+
+      function connect() {
+        const socket = new SockJS("http://localhost:1567/ws?token=" + token);
+        stompClient = Stomp.over(socket);
+
+        stompClient.connect(
+          { Authorization: "Bearer " + token },
+          (frame) => {
+            console.log("✅ Connected:", frame);
+          },
+          (error) => console.error("❌ Connection error:", error)
+        );
+      }
+
+      function sendQrUpdate() {
+        if (!stompClient || !stompClient.connected) {
+          alert("WebSocket not connected!");
+          return;
+        }
+
+        const type = document.getElementById("type").value.trim();
+        session_id = document.getElementById("session_id").value.trim();
+        const qr_id = document.getElementById("qr_id").value.trim();
+
+        if (!type || !session_id || !qr_id) {
+          alert("All fields are required!");
+          return;
+        }
+
+        // Subscribe to this session only once
+        if (!subscribedSessions.has(session_id)) {
+          stompClient.subscribe(`/topic/${session_id}`, (message) => {
+            showNotification(message.body);
+          });
+          subscribedSessions.add(session_id);
+        }
+
+        const payload = { type, session_id, qr_id };
+        stompClient.send("/app/qr/update", {}, JSON.stringify(payload));
+        console.log("QR Update sent:", payload);
+
+        // Clear inputs
+        document.getElementById("type").value = "";
+        document.getElementById("session_id").value = "";
+        document.getElementById("qr_id").value = "";
+      }
+
+      function showNotification(message) {
+        const div = document.getElementById("notifications");
+        const p = document.createElement("p");
+        p.textContent = message;
+        div.appendChild(p);
+      }
+
+      window.onload = connect;
+    </script>
+  </body>
+</html>
