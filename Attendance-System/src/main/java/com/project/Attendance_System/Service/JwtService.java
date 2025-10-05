@@ -4,14 +4,13 @@ import io.jsonwebtoken.Claims;
 import io.jsonwebtoken.Jwts;
 import io.jsonwebtoken.io.Decoders;
 import io.jsonwebtoken.security.Keys;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.security.core.userdetails.UserDetails;
 import org.springframework.stereotype.Service;
 
-import javax.crypto.KeyGenerator;
 import javax.crypto.SecretKey;
+import java.nio.charset.StandardCharsets;
 import java.util.function.*;
-import java.security.NoSuchAlgorithmException;
-import java.util.Base64;
 import java.util.Date;
 import java.util.HashMap;
 import java.util.Map;
@@ -19,19 +18,8 @@ import java.util.Map;
 @Service
 public class JwtService {
 
-     private final String secret_key;
-
-    JwtService(){
-        try {
-            KeyGenerator keyGenerator = KeyGenerator.getInstance("HmacSHA256");
-            SecretKey key = keyGenerator.generateKey();
-            secret_key = Base64.getEncoder().encodeToString(key.getEncoded());
-
-        } catch (NoSuchAlgorithmException e) {
-            throw new RuntimeException(e);
-        }
-
-    }
+    @Value("${jwt.secret}")
+    private String secret_key;
 
     public String generateToken(String email) {
 
@@ -42,15 +30,14 @@ public class JwtService {
                 .add(claims)
                 .subject(email)
                 .issuedAt(new Date(System.currentTimeMillis()))
-                .expiration(new Date(System.currentTimeMillis() + 60 * 60 * 60 * 24 * 30))
+                .expiration(new Date(System.currentTimeMillis() + 1000 * 60 * 60 * 24 * 30))
                 .and()
                 .signWith(getKey())
                 .compact();
     }
 
     private SecretKey getKey() {
-        byte[] keyBytes = Decoders.BASE64.decode(secret_key);
-        return Keys.hmacShaKeyFor(keyBytes);
+        return Keys.hmacShaKeyFor(secret_key.getBytes(StandardCharsets.UTF_8));
     }
 
     public String extractUserName(String token) {
