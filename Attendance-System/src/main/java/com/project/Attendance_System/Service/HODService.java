@@ -6,28 +6,24 @@ import com.project.Attendance_System.Domain.Dtos.Division.DivisionRequestDto;
 import com.project.Attendance_System.Domain.Dtos.Division.DivisionResponseDto;
 import com.project.Attendance_System.Domain.Dtos.LoginSession.LoginSessionRequestDto;
 import com.project.Attendance_System.Domain.Dtos.LoginSession.LoginSessionRespondDto;
-import com.project.Attendance_System.Domain.Entity.College;
-import com.project.Attendance_System.Domain.Entity.Department;
-import com.project.Attendance_System.Domain.Entity.Division;
-import com.project.Attendance_System.Domain.Entity.LoginSessions;
+import com.project.Attendance_System.Domain.Entity.*;
 import com.project.Attendance_System.Domain.Enum.SessionType;
 import com.project.Attendance_System.ExceptionHandler.Custom.VariableNotFound;
 import com.project.Attendance_System.Mapper.DepartmentMapper;
 import com.project.Attendance_System.Mapper.DivisionMapper;
 import com.project.Attendance_System.Mapper.LoginSessionMapper;
-import com.project.Attendance_System.Repository.CollegeRepo;
-import com.project.Attendance_System.Repository.DepartmentRepo;
-import com.project.Attendance_System.Repository.DivisionRepo;
-import com.project.Attendance_System.Repository.LoginSessionRepo;
+import com.project.Attendance_System.Repository.*;
 import com.project.Attendance_System.Service.Interface.HODServiceInterface;
 import lombok.AllArgsConstructor;
 import lombok.Data;
+import lombok.extern.slf4j.Slf4j;
 import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Service;
 
 import java.util.List;
 import java.util.UUID;
 
+@Slf4j
 @Service
 @AllArgsConstructor
 @Data
@@ -41,6 +37,7 @@ public class HODService implements HODServiceInterface {
     private final CollegeRepo collegeRepo;
     private final DepartmentRepo departmentRepo;
     private final DivisionRepo divisionRepo;
+    private final CourseRepo courseRepo;
 
     public ResponseEntity<LoginSessionRespondDto> createSessionLogin(LoginSessionRequestDto loginSessionRequestDto) {
         UUID college_id = loginSessionRequestDto.getCollege();
@@ -75,15 +72,26 @@ public class HODService implements HODServiceInterface {
 
     public ResponseEntity<DivisionResponseDto> createDivision(DivisionRequestDto divisionRequestDto){
         Department department = departmentRepo.findById(divisionRequestDto.getDepartmentId())
-                .orElseThrow(() -> new VariableNotFound("Division"));
+                .orElseThrow(() -> new VariableNotFound("Department not found"));
 
         College college = department.getCollege();
 
         Division division = divisionMapper.toDivision(divisionRequestDto, department);
-        divisionRepo.save(division);
 
-        DivisionResponseDto divisionResponseDto = divisionMapper.toDto(division);
-        return ResponseEntity.ok().body(divisionResponseDto);
+        List<Course> courses = courseRepo.findAllById(divisionRequestDto.getCourseIds());
+        if (courses.isEmpty()) {
+            throw new VariableNotFound("No valid courses found for provided IDs");
+        }
+
+        division.setCourses(courses);
+
+        log.info("Division {} is created in College {} under Department {} with {} course(s)",
+                division.getName(), college.getName(), department.getName(), courses.size());
+
+        Division savedDivision = divisionRepo.save(division);
+
+        DivisionResponseDto responseDto = divisionMapper.toDto(savedDivision);
+        return ResponseEntity.ok(responseDto);
     }
 
     public ResponseEntity<List<DivisionResponseDto>> getDivisionInDepartment(UUID department_id){

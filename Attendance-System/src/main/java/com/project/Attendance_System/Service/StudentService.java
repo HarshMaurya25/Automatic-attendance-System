@@ -14,18 +14,24 @@ import com.project.Attendance_System.Mapper.StudentMapper;
 import com.project.Attendance_System.Mapper.UserMapper;
 import com.project.Attendance_System.Repository.*;
 import com.project.Attendance_System.Service.Interface.StudentServiceInterface;
+import jakarta.transaction.Transactional;
 import lombok.AllArgsConstructor;
 import lombok.Data;
+import lombok.extern.slf4j.Slf4j;
+import org.apache.coyote.BadRequestException;
 import org.springframework.http.ResponseEntity;
 import org.springframework.messaging.simp.SimpMessagingTemplate;
 import org.springframework.security.core.userdetails.UsernameNotFoundException;
 import org.springframework.stereotype.Service;
+import org.springframework.web.servlet.support.ServletUriComponentsBuilder;
 
+import java.net.URI;
 import java.rmi.ServerError;
 import java.time.LocalDate;
 import java.util.List;
 import java.util.UUID;
 
+@Slf4j
 @Service
 @Data
 @AllArgsConstructor
@@ -44,42 +50,51 @@ public class StudentService implements StudentServiceInterface {
     private final DivisionRepo divisionRepo;
     private final UserRepo userRepo;
 
-    @Override
+    @Transactional
     public ResponseEntity<StudentResponseDto> createNewStudent(StudentLoginRequestDto dto) {
-        if (studentsRepo.existsByEmail(dto.getEmail())) {
-            throw new RuntimeException("User Already Exist");
+        String email = dto.getEmail().trim().toLowerCase();
+
+        if (studentsRepo.existsByEmailIgnoreCase(email)) {
+            throw new VariableNotFound("Student with email already exists");
         }
 
-        UUID sessionId = UUID.fromString(dto.getSession_code());
+        UUID sessionId;
+        try {
+            sessionId = UUID.fromString(dto.getSession_code());
+        } catch (IllegalArgumentException ex) {
+            throw new RuntimeException("Invalid session_code UUID");
+        }
+
         LoginSessions loginSession = loginSessionRepo.findById(sessionId)
-                .orElseThrow(() -> new LoginSessionIncorrectException("Login Session not found"));
+                .orElseThrow(() -> new VariableNotFound("Login session not found"));
 
-        if (!loginSession.getSession_type().equals(SessionType.STUDENT)) {
-            throw new LoginSessionIncorrectException(
-                    "Login Session is Incorrect: " + loginSession.getSession_type());
+        if (loginSession.getSession_type() != SessionType.STUDENT) {
+            throw new LoginSessionIncorrectException("Login session is not for STUDENT");
         }
-
-        Student student = studentMapper.ToStudent(dto);
 
         Division division = divisionRepo.findById(loginSession.getPlace_identifier())
                 .orElseThrow(() -> new VariableNotFound("Division"));
+        College college = loginSession.getCollege();
 
-        student.setCollege(loginSession.getCollege());
+        User user = userRepo.findById(email)
+                .orElseThrow(() -> new VariableNotFound("Email"));
+
+        Student student = studentMapper.ToStudent(dto);
+        student.setEmail(email);
+        student.setCollege(college);
         student.setDivision(division);
         student.setDepartment(division.getDepartment());
-
-        User user = userRepo.findById(dto.getEmail())
-                .orElseThrow(() -> new UsernameNotFoundException("User not found: " + dto.getEmail()));
-        if (user == null) {
-            throw new UsernameNotFoundException("user is not found " + dto.getEmail());
-        }
-
         student.setUser(user);
 
-        Student savedStudent = studentsRepo.save(student);
+        Student saved = studentsRepo.save(student);
 
-        StudentResponseDto responseDto = studentMapper.ToStudentResponseDto(savedStudent);
-        return ResponseEntity.ok(responseDto);
+        StudentResponseDto responseDto = studentMapper.ToStudentResponseDto(saved);
+        URI location = ServletUriComponentsBuilder.fromCurrentRequest()
+                .path("/{id}")
+                .buildAndExpand(saved.getId())
+                .toUri();
+
+        return ResponseEntity.created(location).body(responseDto);
     }
 
     public ResponseEntity<StudentResponseDto> getStudentDetail(UUID id) {
@@ -92,19 +107,20 @@ public class StudentService implements StudentServiceInterface {
     }
 
     public ResponseEntity<List<AttendanceRespondDto>> getStudentAttendance(UUID id, LocalDate start, LocalDate end) {
-
         Student student = studentsRepo.findById(id).orElseThrow(() -> new VariableNotFound("Student"));
 
+        log.info("Student {} is Accessing between {} and {} " , student.getEmail() , start , end);
         List<Attendance> attendances = attendanceRepo
                 .findByStudentIdAndDateBetweenOrderByDateAscTimeAsc(student.getId(), start, end);
 
+        if (attendances.isEmpty()) {
+            return ResponseEntity.noContent().build();
+        }
+
+        System.out.println(attendances.toString());
         List<AttendanceRespondDto> attendanceRespondDto = attendances.stream()
                 .map(attendanceMapper::toDto)
                 .toList();
-
-        if (attendanceRespondDto.isEmpty()) {
-            return ResponseEntity.noContent().build();
-        }
 
         return ResponseEntity.ok().body(attendanceRespondDto);
     }
@@ -115,7 +131,6 @@ public class StudentService implements StudentServiceInterface {
 
         if (updated == 0) {
             throw new RuntimeException("Attendance record not found or already marked.");
-        }
         }
 
     return"Attendance marked successfully";

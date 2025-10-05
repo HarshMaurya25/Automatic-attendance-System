@@ -15,4 +15,6 @@ public interface StudentsRepo extends JpaRepository<Student, UUID> {
 
     @Query("SELECT s.id FROM Student s WHERE s.email = :email")
     UUID getIdByEmail(@Param("email") String email);
+
+    boolean existsByEmailIgnoreCase(String email);
 }

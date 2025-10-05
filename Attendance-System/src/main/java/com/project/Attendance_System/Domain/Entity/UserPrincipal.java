@@ -1,5 +1,6 @@
 package com.project.Attendance_System.Domain.Entity;
 
+import lombok.extern.slf4j.Slf4j;
 import org.springframework.security.core.GrantedAuthority;
 import org.springframework.security.core.authority.SimpleGrantedAuthority;
 import org.springframework.security.core.userdetails.UserDetails;
@@ -8,6 +9,7 @@ import java.util.Collection;
 import java.util.Collections;
 import java.util.UUID;
 
+@Slf4j
 public class UserPrincipal implements UserDetails {
     private User user;
 
@@ -29,6 +31,7 @@ public class UserPrincipal implements UserDetails {
     @Override
     public Collection<? extends GrantedAuthority> getAuthorities() {
         String role = user.getAuthority().toString();
+        log.info("Role {} Is Accessing", role);
         if (!role.startsWith("ROLE_")) {
             role = "ROLE_" + role;
         }

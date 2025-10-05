@@ -37,11 +37,7 @@ public class Student {
 
     private LocalDate date_of_birth;
 
-<<<<<<< HEAD
-    private String acadmic_year;
-=======
     private String academic_year;
->>>>>>> H2_Data
 
     @ManyToOne
     @JoinColumn(name = "division")
