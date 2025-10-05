@@ -10,6 +10,7 @@ import com.project.Attendance_System.Repository.StaffRepo;
 import com.project.Attendance_System.Repository.StudentsRepo;
 import com.project.Attendance_System.Repository.UserRepo;
 import lombok.AllArgsConstructor;
+import lombok.extern.slf4j.Slf4j;
 import org.springframework.security.authentication.AuthenticationManager;
 import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
 import org.springframework.security.core.Authentication;
@@ -22,6 +23,7 @@ import java.util.Map;
 import java.util.Objects;
 import java.util.UUID;
 
+@Slf4j
 @Service
 @AllArgsConstructor
 public class UserService {
@@ -40,7 +42,6 @@ public class UserService {
 
     public String createuser(RegisterRequestDto dto){
         User user = userMapper.fromLoginRequestDto(dto);
-
         user.setPassword(passwordEncoder.encode(dto.getPassword()));
 
         userRepo.save(user);
@@ -48,6 +49,7 @@ public class UserService {
         Authentication authentication = authmanager.authenticate(new UsernamePasswordAuthenticationToken(dto.getEmail() , dto.getPassword()));
 
         if(authentication.isAuthenticated()){
+            log.info("User {} is created with authority" , dto.getEmail() , dto.getAuthority());
             return jwtService.generateToken(dto.getEmail());
         }else{
             throw new UsernameNotFoundException("UserName/Email and password is not found");
@@ -71,6 +73,7 @@ public class UserService {
                 throw new UsernameNotFoundException("UserName/Email and password is not found in " + dto.getAuthority());
             }
 
+            log.info("User {} is Authenticated with Authority", dto.getEmail() , dto.getAuthority());
             return LoginResponse.builder()
                     .uuid(id)
                     .gmail(dto.getEmail())

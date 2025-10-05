@@ -31,7 +31,6 @@ public class UserPrincipal implements UserDetails {
     @Override
     public Collection<? extends GrantedAuthority> getAuthorities() {
         String role = user.getAuthority().toString();
-        log.info("Role {} Is Accessing", role);
         if (!role.startsWith("ROLE_")) {
             role = "ROLE_" + role;
         }

@@ -12,6 +12,7 @@ import com.project.Attendance_System.Repository.*;
 import com.project.Attendance_System.Service.Interface.TeacherServiceInterface;
 import lombok.AllArgsConstructor;
 import lombok.Data;
+import lombok.extern.slf4j.Slf4j;
 import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Service;
 
@@ -19,6 +20,7 @@ import java.util.List;
 import java.util.UUID;
 import java.util.stream.Collectors;
 
+@Slf4j
 @Service
 @Data
 @AllArgsConstructor
@@ -55,6 +57,7 @@ public class TeacherService implements TeacherServiceInterface {
             return ResponseEntity.notFound().build();
         }
 
+        log.info("Attendance of College : {} ,Division : {} and Course : {} is Accessed" ,division.getCollege().getName(), division.getName(), course.getName());
         return ResponseEntity.ok().body(attendanceResponseByCourseDtos);
     }
 
@@ -62,6 +65,7 @@ public class TeacherService implements TeacherServiceInterface {
         Staff teacher = staffRepo.findById(id)
                 .orElseThrow(()-> new VariableNotFound("Teacher"));
 
+        log.info("Teacher {} is accessed" , teacher.getEmail());
         return teacherMapper.toDto(teacher);
     }
 }

@@ -56,6 +56,8 @@ public class StudentService implements StudentServiceInterface {
     public ResponseEntity<StudentResponseDto> createNewStudent(StudentLoginRequestDto dto) {
         String email = dto.getEmail().trim().toLowerCase();
 
+        log.info("Student {} is trying to Create a account with gmail {}" , dto.getFirst_name() + " " + dto.getSurname() , dto.getEmail());
+
         if (studentsRepo.existsByEmailIgnoreCase(email)) {
             throw new VariableNotFound("Student with email already exists");
         }
@@ -89,6 +91,8 @@ public class StudentService implements StudentServiceInterface {
         student.setUser(user);
 
         Student saved = studentsRepo.save(student);
+
+        log.info("Student with email {} is registered in college : {} and division : {} with id : {}", dto.getEmail() , college.getName() , division.getName() , student.getId());
 
         StudentResponseDto responseDto = studentMapper.ToStudentResponseDto(saved);
         URI location = ServletUriComponentsBuilder.fromCurrentRequest()
@@ -124,6 +128,7 @@ public class StudentService implements StudentServiceInterface {
                 .map(attendanceMapper::toDto)
                 .toList();
 
+        log.info("Student with email {} is delivered the atteadance" , student.getEmail());
         return ResponseEntity.ok().body(attendanceRespondDto);
     }
 

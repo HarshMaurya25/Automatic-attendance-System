@@ -14,6 +14,7 @@ import com.project.Attendance_System.Mapper.DivisionMapper;
 import com.project.Attendance_System.Mapper.LoginSessionMapper;
 import com.project.Attendance_System.Repository.*;
 import com.project.Attendance_System.Service.Interface.HODServiceInterface;
+import jakarta.transaction.Transactional;
 import lombok.AllArgsConstructor;
 import lombok.Data;
 import lombok.extern.slf4j.Slf4j;
@@ -39,11 +40,14 @@ public class HODService implements HODServiceInterface {
     private final DivisionRepo divisionRepo;
     private final CourseRepo courseRepo;
 
+    @Transactional
     public ResponseEntity<LoginSessionRespondDto> createSessionLogin(LoginSessionRequestDto loginSessionRequestDto) {
         UUID college_id = loginSessionRequestDto.getCollege();
 
         College college = collegeRepo.findById(college_id)
                 .orElseThrow(() -> new RuntimeException("College not found"));
+
+        log.info("Creating a login Session for College : {} and Authority : {}", college.getName() , loginSessionRequestDto.getSessionType());
 
         LoginSessions loginSessions = null;
         LoginSessionRespondDto loginSessionRespondDto = null;
@@ -67,9 +71,12 @@ public class HODService implements HODServiceInterface {
         if(loginSessions == null){
             throw new RuntimeException("Error Creating Session");
         }
+
+        log.info("Login session is created for College : {} and Authority : {} where id ; {}" , college.getName() , loginSessionRequestDto.getSessionType() , loginSessionRespondDto.getId());
         return ResponseEntity.ok().body(loginSessionRespondDto);
     }
 
+    @Transactional
     public ResponseEntity<DivisionResponseDto> createDivision(DivisionRequestDto divisionRequestDto){
         Department department = departmentRepo.findById(divisionRequestDto.getDepartmentId())
                 .orElseThrow(() -> new VariableNotFound("Department not found"));
@@ -77,6 +84,8 @@ public class HODService implements HODServiceInterface {
         College college = department.getCollege();
 
         Division division = divisionMapper.toDivision(divisionRequestDto, department);
+
+        log.info("Division is created for college : {} and department : {}" , college.getName() , department.getName());
 
         List<Course> courses = courseRepo.findAllById(divisionRequestDto.getCourseIds());
         if (courses.isEmpty()) {
@@ -91,16 +100,20 @@ public class HODService implements HODServiceInterface {
         Division savedDivision = divisionRepo.save(division);
 
         DivisionResponseDto responseDto = divisionMapper.toDto(savedDivision);
+
+        log.info("Division is created for college : {} and department : {} where Name is : {} and Id : {}" , college.getName() , department.getName() , responseDto.getName() , responseDto.getId());
         return ResponseEntity.ok(responseDto);
     }
 
+    @Transactional
     public ResponseEntity<List<DivisionResponseDto>> getDivisionInDepartment(UUID department_id){
         Department department = departmentRepo.findById(department_id).orElseThrow(
                 () -> new VariableNotFound("Department")
         );
         List<Division> divisions = divisionRepo.findAllByDepartment(department);
-
         List<DivisionResponseDto> divisionResponseDtos = divisionMapper.toDtoList(divisions);
+
+        log.info("Accessing the Divisions for Department ; {} where college is {}" , department.getName() , department.getCollege().getName());
 
         return ResponseEntity.ok().body(divisionResponseDtos);
 
@@ -125,6 +138,7 @@ public class HODService implements HODServiceInterface {
                     .orElseThrow(() -> new VariableNotFound("Department"));
 
             DepartmentResponseDto departmentResponseDto = departmentMapper.toDto(department);
+            log.info("Accessing the Department ; {} where college is {}" , department.getName() , department.getCollege().getName());
             return ResponseEntity.ok().body(departmentResponseDto);
         }
 }

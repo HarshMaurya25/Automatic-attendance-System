@@ -56,6 +56,8 @@ public class LectureService {
         LectureLogs lectureLogs = LectureLogs.builder().build();
         lectureLogsRepo.save(lectureLogs);
 
+        log.info("Lecture is Creating where College : {} , division : {} , teacher : {} and Course : {}" , division.getCollege().getName() , division.getName() , teacher.getEmail() , course.getName());
+
         Map<UUID , String> students = new HashMap<>();
         List<Attendance> attendances = new ArrayList<>();
         for (Student student : division.getStudent()) {
@@ -76,6 +78,8 @@ public class LectureService {
                 .id(lectureLogs.getId())
                 .students(students)
                 .build();
+
+        log.info("Lecture for Teacher : {} and Course ; {} is created where ID ; {}" , teacher.getEmail() , course.getName() , lectureLogs.getId());
         return createLectureResponse;
     }
 

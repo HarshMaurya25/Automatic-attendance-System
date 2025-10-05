@@ -13,12 +13,14 @@ import com.project.Attendance_System.Repository.*;
 import com.project.Attendance_System.Service.Interface.AttendanceServiceInterface;
 import lombok.AllArgsConstructor;
 import lombok.Data;
+import lombok.extern.slf4j.Slf4j;
 import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Service;
 
 import java.util.List;
 import java.util.UUID;
 
+@Slf4j
 @Service
 @AllArgsConstructor
 @Data
@@ -42,6 +44,8 @@ public class AttendanceService implements AttendanceServiceInterface {
         Student student = studentsRepo.findById(studentId)
                 .orElseThrow(() -> new VariableNotFound("Student"));
 
+        log.info("Attendance Summary for student : {} is Accessing", student.getEmail());
+
         List<Attendance> attendances = attendanceRepo.findAllByStudent(student);
 
         long total = attendances.size();
@@ -63,6 +67,8 @@ public class AttendanceService implements AttendanceServiceInterface {
                 .attendance_percentage(percentage)
                 .build();
 
+        log.info("Attendance Summary for student : {} is given", student.getEmail());
+
         return ResponseEntity.ok().body(studentAttendanceSummaryDto);
     }
 
@@ -71,6 +77,8 @@ public class AttendanceService implements AttendanceServiceInterface {
                 .orElseThrow(() -> new VariableNotFound("Division"));
 
         List<Student> students = division.getStudent();
+
+        log.info("Attendance Summary for Division : {} where college is : {} is given",division.getName() , division.getCollege().getName());
 
         return students.stream().map(student -> {
             List<Attendance> attendances = attendanceRepo.findAllByStudent(student);
