@@ -1,10 +1,24 @@
 # Automatic Attendance System (Spring Boot)
 
+Automatic attendance system is the attendence and student management system build in springboot. It provide easy way to record the attendance and manage it. It provode student management and database for all important information. It have Qr based scanning for attendance that is fast and secure.
+
+Features
+- Dynamic Qr based
+- jwt based authentication
+- Role based access
+- Password encoding
+- Get Student detail, registration and login
+- Get Student attendance by date between
+- Get Attendance of Division
+- Get Teacher Details
+- Create Division and get all division
+
+
 Compact Spring Boot backend for attendance management with JWT auth and STOMP WebSocket realtime updates.
 
 Tech stack
 - Java + Spring Boot (Security, Data JPA, WebSocket/STOMP)
-- JPA / relational DB (Postgres/MySQL)
+- JPA / relational DB (Postgres/MySQL/H2)
 - JWT for stateless auth
 - SockJS / STOMP for realtime notifications
 
