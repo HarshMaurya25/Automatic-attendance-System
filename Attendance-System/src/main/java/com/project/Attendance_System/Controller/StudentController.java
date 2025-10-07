@@ -54,7 +54,7 @@ public class StudentController {
 
     @PostMapping("/private/student/lecture/get-attendance")
     public ResponseEntity<String> getAttendance(
-            @RequestBody GetAttendanceDto dto
+            @Valid @RequestBody GetAttendanceDto dto
             ){
         return ResponseEntity.ok().body(studentService.getAttendance(dto));
     }

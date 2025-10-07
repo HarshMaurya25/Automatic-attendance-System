@@ -9,15 +9,15 @@ import java.util.UUID;
 
 @Data
 public class CreateLectureDto {
-    @NotNull
+    @NotBlank
     private String qr_id;
 
-    @NotBlank
+    @NotNull
     private UUID teacher_id;
 
-    @NotBlank
+    @NotNull
     private UUID course_id;
 
-    @NotBlank
+    @NotNull
     private UUID division_id;
 }

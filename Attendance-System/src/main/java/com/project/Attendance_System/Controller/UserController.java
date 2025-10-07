@@ -4,6 +4,7 @@ import com.project.Attendance_System.Domain.Dtos.User.LoginRequestDto;
 import com.project.Attendance_System.Domain.Dtos.User.LoginResponse;
 import com.project.Attendance_System.Domain.Dtos.User.RegisterRequestDto;
 import com.project.Attendance_System.Service.UserService;
+import jakarta.validation.Valid;
 import lombok.AllArgsConstructor;
 import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Controller;
@@ -19,7 +20,7 @@ public class UserController {
 
     @PostMapping("/new")
     public ResponseEntity<String> createUser(
-            @RequestBody RegisterRequestDto dto
+            @Valid @RequestBody RegisterRequestDto dto
     ){
         return ResponseEntity.ok().body(userService.createuser(dto));
 
@@ -27,7 +28,7 @@ public class UserController {
 
     @PostMapping("/login")
     public ResponseEntity<LoginResponse> loginUser(
-            @RequestBody LoginRequestDto dto
+            @Valid @RequestBody LoginRequestDto dto
             ){
         return ResponseEntity.ok().body(userService.verify(dto));
     }

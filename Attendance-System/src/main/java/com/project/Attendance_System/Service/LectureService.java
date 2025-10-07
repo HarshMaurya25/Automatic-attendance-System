@@ -2,8 +2,10 @@ package com.project.Attendance_System.Service;
 
 import com.project.Attendance_System.Domain.Dtos.Lecture.CreateLectureDto;
 import com.project.Attendance_System.Domain.Dtos.Lecture.CreateLectureResponse;
+import com.project.Attendance_System.Domain.Dtos.Lecture.LectureEndDtos;
 import com.project.Attendance_System.Domain.Dtos.Lecture.QrUpdateDto;
 import com.project.Attendance_System.Domain.Entity.*;
+import com.project.Attendance_System.Domain.Enum.Status;
 import com.project.Attendance_System.ExceptionHandler.Custom.VariableNotFound;
 import com.project.Attendance_System.Mapper.LectureMapper;
 import com.project.Attendance_System.Repository.*;
@@ -94,6 +96,41 @@ public class LectureService {
         } else {
             return false;
         }
+    }
+
+    @Transactional
+    public LectureEndDtos endLecture(
+            UUID session_id
+    ){
+        if (!activeSession.containsKey(session_id)) {
+            throw new VariableNotFound("Lecture");
+        }
+
+        List<Attendance> attendance = attendanceRepo.findAllByLectureLogId(session_id);
+        if(attendance.isEmpty()){
+            throw new VariableNotFound("Attendance");
+        }
+
+        long present = attendance.stream()
+                .filter(a -> a.getStatus() != null && a.getStatus().name().equals("PRESENT"))
+                .count();
+
+        long absent = attendance.stream()
+                .filter(a -> a.getStatus() != null && a.getStatus().name().equals("ABSENT"))
+                .count();
+
+        long total = attendance.size();
+
+        LectureEndDtos lectureEndDtos = LectureEndDtos.builder()
+                .total(total)
+                .present(present)
+                .absent(absent)
+                .build();
+
+        activeSession.remove(session_id);
+        log.info("The Lecture with session id {} is removed from active session : {} " , session_id , !activeSession.containsKey(session_id));
+
+        return lectureEndDtos;
     }
 
 }

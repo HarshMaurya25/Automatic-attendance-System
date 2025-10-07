@@ -17,6 +17,7 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Service;
 
 import java.util.List;
+import java.util.Map;
 import java.util.UUID;
 import java.util.stream.Collectors;
 
@@ -68,4 +69,25 @@ public class TeacherService implements TeacherServiceInterface {
         log.info("Teacher {} is accessed" , teacher.getEmail());
         return teacherMapper.toDto(teacher);
     }
+
+    public Map<UUID , String> getCourseFromDivision(UUID id){
+        Division division = divisionRepo.findById(id)
+                .orElseThrow(() -> new VariableNotFound("Division"));
+
+        List<Course> courses = division.getCourses();
+
+        if(courses.isEmpty()){
+            throw new VariableNotFound("Courses in division : "  +  division.getId());
+        }
+
+        Map<UUID, String> coursesByID = courses.stream()
+                .collect(Collectors.toMap(
+                        Course::getId,
+                        Course::getName
+                ));
+
+        log.info("User access division : {} courses" , id);
+        return coursesByID;
+    }
+
 }

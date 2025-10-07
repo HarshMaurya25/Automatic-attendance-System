@@ -33,4 +33,5 @@ public interface AttendanceRepo extends JpaRepository<Attendance, UUID> {
                         @Param("studentId") UUID studentId);
 
         Attendance findByLectureLogIdAndStudentId(UUID sessionID, UUID studentId);
+        List<Attendance> findAllByLectureLogId(UUID sessionID);
 }
